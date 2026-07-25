@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>OPC 多因子選股儀表板</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d1117;color:#c9d1d9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.5}
+.header{background:#161b22;border-bottom:1px solid #30363d;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.header h1{font-size:18px;color:#58a6ff}
+.header .status{font-size:12px;padding:4px 10px;border-radius:4px;background:#1a2332;color:#8b949e}
+.header .status.ready{background:#0d3320;color:#3fb950}
+.header .status.blocked{background:#3d1f1f;color:#f85149}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;padding:12px;max-width:1400px;margin:0 auto}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px}
+.card h2{font-size:14px;color:#8b949e;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px}
+.weather-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px}
+.weather-item{flex:1;min-width:80px}
+.weather-item .val{font-size:22px;font-weight:700}
+.weather-item .lbl{font-size:11px;color:#8b949e;margin-top:2px}
+.bull{color:#3fb950}.bear{color:#f85149}.sideways{color:#d2991d}
+.signal-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #21262d;font-size:13px}
+.signal-row:last-child{border-bottom:0}
+.code{font-weight:700;color:#58a6ff;min-width:42px}.name{min-width:64px}.path{font-size:10px;padding:2px 6px;border-radius:3px;font-weight:600}
+.path-a{background:#0d3320;color:#3fb950}.path-b{background:#1a2332;color:#79c0ff}.path-c{background:#3d1f1f;color:#ff7b72}
+.score{color:#d2a8ff;min-width:36px;text-align:right}
+.pos-card{border-left:3px solid #30363d;padding:8px 12px;margin:6px 0;font-size:12px}
+.pos-card .pnl-pos{color:#3fb950}.pos-card .pnl-neg{color:#f85149}
+.equity-chart{background:#0d1117;border-radius:4px;padding:12px;margin:8px 0;font-family:monospace;font-size:11px}
+.equity-bar{height:4px;background:#30363d;border-radius:2px;margin:4px 0}
+.equity-bar .fill{height:100%;border-radius:2px;background:#3fb950}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;font-size:12px}
+.metric .num{font-size:18px;font-weight:700}
+.metric .lab{color:#8b949e;font-size:10px}
+.changes{font-size:12px}.changes .add{color:#3fb950}.changes .remove{color:#f85149}.changes .hold{color:#8b949e}
+.disclaimer{text-align:center;padding:20px;font-size:11px;color:#484f58}
+.path-overview{display:flex;gap:8px;flex-wrap:wrap}
+.path-chip{flex:1;min-width:100px;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:10px;text-align:center;font-size:12px}
+.path-chip .pc{font-size:24px;font-weight:700}
+.data-notice{background:#3d1f1f;border:1px solid #f85149;border-radius:6px;padding:12px;margin:12px 0;font-size:12px;color:#ff7b72}
+.tab-bar{display:flex;gap:4px;margin-bottom:10px}
+.tab{font-size:11px;padding:4px 10px;border-radius:4px;background:#21262d;color:#8b949e;cursor:pointer;border:0}
+.tab.active{background:#1f6feb;color:#fff}
+@media(max-width:600px){.grid{grid-template-columns:1fr;padding:6px}.header h1{font-size:14px}}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>OPC 多因子選股儀表板</h1>
+  <div style="display:flex;gap:8px;align-items:center">
+    <span id="dataDate" class="status">載入中...</span>
+    <span id="dataStatus" class="status">DATA_NOT_READY</span>
+  </div>
+</div>
+<div class="grid" id="dashboard">
+  <div class="card" style="text-align:center;padding:40px;color:#8b949e">載入資料中...</div>
+</div>
+<div class="disclaimer">Forward Shadow 模擬。非正式投資建議。所有價位均為模擬，不代表真實交易。</div>
+<script>
+async function load() {
+  try {
+    const r = await fetch('data/latest.json');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    render(d);
+  } catch(e) {
+    document.getElementById('dashboard').innerHTML =
+      '<div class="card"><div class="data-notice">DATA_NOT_READY — 無法載入 latest.json<br>最後嘗試: ' + new Date().toLocaleString('zh-TW') + '<br>錯誤: ' + e.message + '</div></div>';
+    document.getElementById('dataStatus').textContent = 'ERROR';
+    document.getElementById('dataStatus').className = 'status blocked';
+  }
+}
+
+function render(d) {
+  document.getElementById('dataDate').textContent = d.data_date || 'N/A';
+  const st = d.data_limitations?.t86_available ? 'PARTIAL' : 'BLOCKED';
+  document.getElementById('dataStatus').textContent = st;
+  document.getElementById('dataStatus').className = 'status ' + (st === 'BLOCKED' ? 'blocked' : 'ready');
+
+  const r = d.market_weather || {};
+  const p = d.portfolio || {};
+  const s = d.top_signals || {};
+  const pos = d.positions || [];
+  const eq = d.equity_curve || [];
+  const ch = d.daily_changes || {};
+  const po = d.path_overview || {};
+
+  const regimeClass = (r.regime === 'BULL') ? 'bull' : (r.regime === 'BEAR' ? 'bear' : 'sideways');
+  const regimeLabel = (r.regime === 'BULL') ? '偏多' : (r.regime === 'BEAR' ? '偏空' : '震盪');
+
+  const equityStart = eq.length > 0 ? eq[0].equity : 10000000;
+  const equityNow = eq.length > 0 ? eq[eq.length-1].equity : 10000000;
+  const totalReturn = ((equityNow - equityStart) / equityStart * 100).toFixed(2);
+  const eqBars = eq.map((e,i) => {
+    const h = Math.max(2, ((e.equity - 9500000) / 500000) * 100);
+    return '<div class="equity-bar"><div class="fill" style="width:' + h + '%"></div></div><span style="font-size:9px;color:#8b949e">' + e.date.slice(5) + ' $' + (e.equity/1000000).toFixed(2) + 'M</span>';
+  }).join('');
+
+  const posHtml = pos.map(px => {
+    const pnlClass = px.pnl_pct >= 0 ? 'pnl-pos' : 'pnl-neg';
+    return '<div class="pos-card">' +
+      '<div style="display:flex;justify-content:space-between">' +
+      '<span><span class="code">' + px.code + '</span> <span class="name">' + (px.name||'') + '</span></span>' +
+      '<span class="path path-' + (px.path||'PATH_A').slice(-1).toLowerCase() + '">' + (px.path||'') + '</span>' +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;margin-top:4px">' +
+      '<span>成本 $' + (px.entry_price||0).toFixed(1) + ' → 現價 $' + (px.current_price||0).toFixed(1) + '</span>' +
+      '<span class="' + pnlClass + '">' + (px.pnl_pct >= 0 ? '+' : '') + (px.pnl_pct||0).toFixed(1) + '%</span>' +
+      '</div>' +
+      '<div style="font-size:10px;color:#8b949e;margin-top:2px">進場 ' + (px.entry_date||'') + ' | ' + (px.industry||'') + ' | 預期退場 ' + (px.exit_due||'') + '</div>' +
+      '</div>';
+  }).join('');
+
+  const html = `
+    <div class="card">
+      <h2>市場天氣</h2>
+      <div class="weather-row">
+        <div class="weather-item"><div class="val ${regimeClass}">${regimeLabel}</div><div class="lbl">市場狀態</div></div>
+        <div class="weather-item"><div class="val">${r.breadth_pct||'--'}%</div><div class="lbl">市場廣度</div></div>
+        <div class="weather-item"><div class="val">${r.top_sectors?.slice(0,2).join(', ')||'--'}</div><div class="lbl">強勢產業</div></div>
+        <div class="weather-item"><div class="val">${r.weak_sectors?.slice(0,2).join(', ')||'--'}</div><div class="lbl">弱勢產業</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>三路徑總覽</h2>
+      <div class="path-overview">
+        ${Object.entries(po).map(([k,v])=>`
+          <div class="path-chip">
+            <div class="pc">${v.selected||0}/${v.signals||0}</div>
+            <div style="color:#8b949e;font-size:10px">${v.label||k}</div>
+            <div style="font-size:10px">入選/候選</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Forward Shadow 模擬持倉 (${pos.length} 檔)</h2>
+      ${d.data_limitations?.ohlcv_coverage ? '<div class="data-notice" style="font-size:10px;padding:6px;margin-bottom:8px">OHLCV 覆蓋率：' + d.data_limitations.ohlcv_coverage + '（資料補齊中）</div>' : ''}
+      ${posHtml || '<div style="color:#8b949e;font-size:12px">尚無模擬持倉</div>'}
+    </div>
+
+    <div class="card">
+      <h2>十大觀察 — PATH_A 資金輪動領漲</h2>
+      ${(s.PATH_A||[]).slice(0,5).map((x,i)=>`
+        <div class="signal-row"><span class="code">${x.code}</span><span class="name">${x.name||''}</span><span class="path path-a">PATH_A</span><span class="score">${typeof x.score==='number'?x.score.toFixed(1):x.score}</span></div>
+      `).join('')||'<div style="color:#8b949e;font-size:12px">暫無訊號</div>'}
+      <div style="margin-top:10px;border-top:1px solid #21262d;padding-top:8px">
+        <h2 style="margin-bottom:6px">PATH_B 底部轉強</h2>
+        ${(s.PATH_B||[]).slice(0,3).map((x,i)=>`
+          <div class="signal-row"><span class="code">${x.code}</span><span class="name">${x.name||''}</span><span class="path path-b">PATH_B</span><span class="score">${typeof x.score==='number'?x.score.toFixed(1):x.score}</span></div>
+        `).join('')||'<div style="color:#8b949e;font-size:12px">暫無訊號</div>'}
+      </div>
+      <div style="margin-top:10px;border-top:1px solid #21262d;padding-top:8px">
+        <h2 style="margin-bottom:6px">PATH_C 個股異常發動</h2>
+        ${(s.PATH_C||[]).slice(0,2).map((x,i)=>`
+          <div class="signal-row"><span class="code">${x.code}</span><span class="name">${x.name||''}</span><span class="path path-c">PATH_C</span><span class="score">${typeof x.score==='number'?x.score.toFixed(1):x.score}</span></div>
+        `).join('')||'<div style="color:#8b949e;font-size:12px">暫無訊號</div>'}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>每日變化</h2>
+      <div class="changes">
+        <span class="add">+${ch.new_entries||0} 新增</span> &nbsp;
+        <span class="hold">${ch.continued_holds||0} 續持</span> &nbsp;
+        <span>${ch.downgraded||0} 降級</span> &nbsp;
+        <span class="remove">-${ch.removed||0} 移除</span>
+      </div>
+      <div style="font-size:10px;color:#8b949e;margin-top:6px">拒絕原因: ${Object.entries(ch.rejection_reasons||{}).map(([k,v])=>k+':'+v).join(', ')||'無'}</div>
+    </div>
+
+    <div class="card">
+      <h2>模型成績</h2>
+      <div class="metrics">
+        <div class="metric"><div class="num ${totalReturn>=0?'bull':'bear'}">${totalReturn>=0?'+':''}${totalReturn}%</div><div class="lab">累積報酬</div></div>
+        <div class="metric"><div class="num">${p.completed_rt||0}</div><div class="lab">完成交易</div></div>
+        <div class="metric"><div class="num">${p.open_rt||p.total_positions||0}</div><div class="lab">未平倉</div></div>
+        <div class="metric"><div class="num">$${(p.equity/1000000).toFixed(2)}M</div><div class="lab">模擬權益</div></div>
+      </div>
+      <div class="equity-chart">
+        <div style="color:#8b949e;margin-bottom:4px">Forward Shadow Equity Curve</div>
+        ${eqBars}
+      </div>
+      <div style="font-size:10px;color:#8b949e;text-align:center;margin-top:6px">起始資金 $10M | 僅 2 日資料 | 累積中</div>
+    </div>
+
+    <div class="card">
+      <h2>資料狀態</h2>
+      <div style="font-size:12px">
+        <div>資料日期: ${d.data_date||'N/A'}</div>
+        <div>更新時間: ${d.updated||'N/A'}</div>
+        <div>T86 (法人): ${d.data_limitations?.t86_available?'✅':'❌'}</div>
+        <div>MI_INDEX (產業): ${d.data_limitations?.mi_index_available?'✅':'❌'}</div>
+        <div>OHLCV: ${d.data_limitations?.ohlcv_coverage||'N/A'}</div>
+        <div style="margin-top:8px;color:#8b949e">${d.disclaimer||''}</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('dashboard').innerHTML = html;
+}
+
+load();
+</script>
+</body>
+</html>

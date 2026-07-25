@@ -1,0 +1,188 @@
+{
+  "updated": "2026-07-26 01:13:18.419740",
+  "data_date": "2026-07-24",
+  "status": "PARTIAL_DATA",
+  "market_weather": {
+    "regime": "SIDEWAYS",
+    "breadth_pct": 45,
+    "turnover_note": "Moderate",
+    "top_sectors": [
+      "化學工業",
+      "塑膠工業",
+      "金融保險業"
+    ],
+    "weak_sectors": [
+      "電腦及週邊設備業",
+      "通信網路業"
+    ]
+  },
+  "top_signals": {
+    "PATH_A": [],
+    "PATH_B": [],
+    "PATH_C": []
+  },
+  "path_overview": {
+    "PATH_A": {
+      "label": "資金輪動領漲",
+      "signals": 135,
+      "selected": 4
+    },
+    "PATH_B": {
+      "label": "底部轉強",
+      "signals": 107,
+      "selected": 3
+    },
+    "PATH_C": {
+      "label": "個股異常發動",
+      "signals": 25,
+      "selected": 3
+    }
+  },
+  "portfolio": {
+    "total_positions": 9,
+    "cash": 3789677,
+    "equity": 9859477,
+    "initial_capital": 10000000,
+    "realized_pnl": -8372.63,
+    "unrealized_pnl": -140523,
+    "completed_rt": 0,
+    "open_rt": 9
+  },
+  "positions": [
+    {
+      "code": "",
+      "name": "研華",
+      "path": "PATH_A",
+      "shares": 1000,
+      "entry_price": 585.0,
+      "entry_date": "2026-07-24",
+      "current_price": 581.0,
+      "pnl_pct": -0.68,
+      "industry": "電腦及週邊設備業",
+      "exit_due": "2026-07-31"
+    },
+    {
+      "code": "",
+      "name": "微星",
+      "path": "PATH_A",
+      "shares": 7000,
+      "entry_price": 149.0,
+      "entry_date": "2026-07-24",
+      "current_price": 146.5,
+      "pnl_pct": -1.68,
+      "industry": "電腦及週邊設備業",
+      "exit_due": "2026-07-31"
+    },
+    {
+      "code": "",
+      "name": "台塑化",
+      "path": "PATH_A",
+      "shares": 9000,
+      "entry_price": 97.6,
+      "entry_date": "2026-07-24",
+      "current_price": 85.8,
+      "pnl_pct": -12.09,
+      "industry": "油電燃氣業",
+      "exit_due": "2026-07-31"
+    },
+    {
+      "code": "",
+      "name": "杏輝",
+      "path": "PATH_B",
+      "shares": 26000,
+      "entry_price": 31.25,
+      "entry_date": "2026-07-24",
+      "current_price": 31.4,
+      "pnl_pct": 0.48,
+      "industry": "生技醫療業",
+      "exit_due": "2026-07-31"
+    },
+    {
+      "code": "",
+      "name": "拓凱",
+      "path": "PATH_B",
+      "shares": 4000,
+      "entry_price": 165.0,
+      "entry_date": "2026-07-24",
+      "current_price": 165.5,
+      "pnl_pct": 0.3,
+      "industry": "運動休閒",
+      "exit_due": "2026-07-31"
+    },
+    {
+      "code": "",
+      "name": "佳格",
+      "path": "PATH_B",
+      "shares": 23000,
+      "entry_price": 28.75,
+      "entry_date": "2026-07-24",
+      "current_price": 29.2,
+      "pnl_pct": 1.57,
+      "industry": "食品工業",
+      "exit_due": "2026-07-31"
+    },
+    {
+      "code": "",
+      "name": "恆大",
+      "path": "PATH_C",
+      "shares": 21000,
+      "entry_price": 27.7,
+      "entry_date": "2026-07-24",
+      "current_price": 27.7,
+      "pnl_pct": 0.0,
+      "industry": "塑膠工業",
+      "exit_due": "2026-07-31"
+    },
+    {
+      "code": "",
+      "name": "亞諾法",
+      "path": "PATH_C",
+      "shares": 23000,
+      "entry_price": 22.5,
+      "entry_date": "2026-07-24",
+      "current_price": 21.6,
+      "pnl_pct": -4.0,
+      "industry": "生技醫療業",
+      "exit_due": "2026-07-31"
+    },
+    {
+      "code": "",
+      "name": "成信實業*-創",
+      "path": "PATH_C",
+      "shares": 12000,
+      "entry_price": 38.55,
+      "entry_date": "2026-07-24",
+      "current_price": 38.55,
+      "pnl_pct": 0.0,
+      "industry": "綠能環保",
+      "exit_due": "2026-07-31"
+    }
+  ],
+  "daily_changes": {
+    "new_entries": 9,
+    "continued_holds": 0,
+    "downgraded": 0,
+    "removed": 0,
+    "rejection_reasons": {
+      "SECTOR_LIMIT": 12,
+      "INSUFFICIENT_CASH": 2
+    }
+  },
+  "equity_curve": [
+    {
+      "date": "2026-07-23",
+      "equity": 10000000
+    },
+    {
+      "date": "2026-07-24",
+      "equity": 9859477
+    }
+  ],
+  "disclaimer": "Forward Shadow 模擬。非正式投資建議。資料截至 2026-07-24。",
+  "data_limitations": {
+    "t86_available": true,
+    "mi_index_available": true,
+    "ohlcv_coverage": "294/1080 (partial)",
+    "last_complete_date": "2026-07-23"
+  }
+}
