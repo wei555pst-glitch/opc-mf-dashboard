@@ -1,209 +1,1420 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
+<!doctype html>
+<html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>OPC 多因子選股儀表板</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="opc-ui-authority" content="OPC_UI_AUTHORITY_v1.0">
+<meta name="opc-ui-write-policy" content="DATA_ONLY">
+<meta name="opc-ui-locale" content="zh-Hant-TW">
+<title>鼎哥選股｜每週選股與持倉追蹤</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#0d1117;color:#c9d1d9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.5}
-.header{background:#161b22;border-bottom:1px solid #30363d;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-.header h1{font-size:18px;color:#58a6ff}
-.header .status{font-size:12px;padding:4px 10px;border-radius:4px;background:#1a2332;color:#8b949e}
-.header .status.ready{background:#0d3320;color:#3fb950}
-.header .status.blocked{background:#3d1f1f;color:#f85149}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;padding:12px;max-width:1400px;margin:0 auto}
-.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px}
-.card h2{font-size:14px;color:#8b949e;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px}
-.weather-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px}
-.weather-item{flex:1;min-width:80px}
-.weather-item .val{font-size:22px;font-weight:700}
-.weather-item .lbl{font-size:11px;color:#8b949e;margin-top:2px}
-.bull{color:#3fb950}.bear{color:#f85149}.sideways{color:#d2991d}
-.signal-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #21262d;font-size:13px}
-.signal-row:last-child{border-bottom:0}
-.code{font-weight:700;color:#58a6ff;min-width:42px}.name{min-width:64px}.path{font-size:10px;padding:2px 6px;border-radius:3px;font-weight:600}
-.path-a{background:#0d3320;color:#3fb950}.path-b{background:#1a2332;color:#79c0ff}.path-c{background:#3d1f1f;color:#ff7b72}
-.score{color:#d2a8ff;min-width:36px;text-align:right}
-.pos-card{border-left:3px solid #30363d;padding:8px 12px;margin:6px 0;font-size:12px}
-.pos-card .pnl-pos{color:#3fb950}.pos-card .pnl-neg{color:#f85149}
-.equity-chart{background:#0d1117;border-radius:4px;padding:12px;margin:8px 0;font-family:monospace;font-size:11px}
-.equity-bar{height:4px;background:#30363d;border-radius:2px;margin:4px 0}
-.equity-bar .fill{height:100%;border-radius:2px;background:#3fb950}
-.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;font-size:12px}
-.metric .num{font-size:18px;font-weight:700}
-.metric .lab{color:#8b949e;font-size:10px}
-.changes{font-size:12px}.changes .add{color:#3fb950}.changes .remove{color:#f85149}.changes .hold{color:#8b949e}
-.disclaimer{text-align:center;padding:20px;font-size:11px;color:#484f58}
-.path-overview{display:flex;gap:8px;flex-wrap:wrap}
-.path-chip{flex:1;min-width:100px;background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:10px;text-align:center;font-size:12px}
-.path-chip .pc{font-size:24px;font-weight:700}
-.data-notice{background:#3d1f1f;border:1px solid #f85149;border-radius:6px;padding:12px;margin:12px 0;font-size:12px;color:#ff7b72}
-.tab-bar{display:flex;gap:4px;margin-bottom:10px}
-.tab{font-size:11px;padding:4px 10px;border-radius:4px;background:#21262d;color:#8b949e;cursor:pointer;border:0}
-.tab.active{background:#1f6feb;color:#fff}
-@media(max-width:600px){.grid{grid-template-columns:1fr;padding:6px}.header h1{font-size:14px}}
+:root{
+  --bg:#07111a;--panel:#0d1b27;--panel2:#0a1721;--line:#20384b;--text:#f2f7fa;--muted:#93a9b7;
+  --cyan:#64d7e7;--blue:#49a9ff;--green:#45d3ad;--amber:#efb55b;--red:#ff727e;--violet:#b99cff;
+  --r:18px;--shadow:0 18px 50px rgba(0,0,0,.22)
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:linear-gradient(180deg,#061019,#081725 54%,#07111a);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC","Microsoft JhengHei",sans-serif
+}
+.wrap{max-width:1320px;margin:auto;padding:0 24px 64px}
+.top{
+  position:sticky;top:0;z-index:20;background:rgba(7,17,26,.94);backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(100,215,231,.12)
+}
+.topin{max-width:1320px;margin:auto;padding:11px 24px;display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:center;gap:11px;min-width:240px}
+.logo{
+  width:44px;height:44px;border:1px solid var(--cyan);border-radius:50%;
+  display:grid;place-items:center;color:var(--cyan);font-weight:900
+}
+.brand b{display:block;font-size:18px}
+.brand small{color:var(--muted);font-size:11px}
+.nav{margin-left:auto;display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.nav button,.demo-btn,.period-btn{
+  border:0;background:transparent;color:#c8d7e0;padding:9px 11px;border-radius:10px;cursor:pointer
+}
+.nav button:hover,.period-btn:hover{background:#102434;color:white}
+.data-badge{font-size:11px;color:var(--muted);white-space:nowrap}
+
+.hero{padding-top:25px}
+.hero-box{
+  border:1px solid rgba(100,215,231,.22);background:linear-gradient(145deg,#0d1d29,#09151f);
+  border-radius:22px;padding:22px;box-shadow:var(--shadow);display:grid;grid-template-columns:1fr auto;
+  gap:20px;align-items:center
+}
+.hero h1{margin:0;font-size:31px}
+.hero p{margin:7px 0 0;color:var(--muted);line-height:1.7;font-size:13px}
+.demo-btn{
+  background:rgba(100,215,231,.08);border:1px solid rgba(100,215,231,.35);
+  color:var(--cyan);font-weight:800;min-width:176px
+}
+.demo-btn:hover{background:rgba(100,215,231,.14)}
+
+.section{margin-top:30px}
+.head{display:flex;justify-content:space-between;gap:18px;align-items:end;margin-bottom:14px}
+.head h2{margin:0;font-size:27px}
+.head p{margin:4px 0 0;color:var(--muted);font-size:13px;line-height:1.65}
+.meta{display:flex;gap:8px;flex-wrap:wrap}
+.pill{
+  border:1px solid var(--line);border-radius:999px;padding:7px 10px;font-size:10px;color:#c8dbe4
+}
+.pill.cyan{border-color:rgba(100,215,231,.35);color:var(--cyan);background:rgba(100,215,231,.06)}
+.pill.green{border-color:rgba(69,211,173,.35);color:var(--green);background:rgba(69,211,173,.06)}
+.pill.amber{border-color:rgba(239,181,91,.35);color:var(--amber);background:rgba(239,181,91,.06)}
+.pill.red{border-color:rgba(255,114,126,.35);color:var(--red);background:rgba(255,114,126,.06)}
+
+.notice{
+  border:1px dashed rgba(100,215,231,.32);border-radius:14px;padding:13px 15px;margin:0 0 14px;
+  color:#bfd7e3;background:rgba(100,215,231,.035);font-size:12px;line-height:1.65
+}
+.notice b{color:var(--cyan)}
+
+.weather-grid{display:grid;grid-template-columns:1fr 1fr 1.05fr;gap:14px}
+.weather-card,.perf-card,.stock{
+  border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,#0d1d29,#0a1721);
+  box-shadow:var(--shadow)
+}
+.weather-card{padding:18px}
+.card-head{display:flex;justify-content:space-between;gap:14px;align-items:start}
+.card-head h3{margin:0;font-size:19px}
+.asof{font-size:10px;color:var(--muted);white-space:nowrap}
+.weather-main{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+.weather-box{padding:12px;border-radius:12px;background:rgba(255,255,255,.026);border:1px solid rgba(147,169,183,.12)}
+.weather-box span{display:block;color:var(--muted);font-size:10px;margin-bottom:5px}
+.weather-box b{font-size:18px}
+.positive{color:var(--green)}.caution{color:var(--amber)}.negative{color:var(--red)}.neutral{color:#d8e6ee}
+.weather-note{margin-top:11px;color:var(--muted);font-size:11px;line-height:1.6}
+.event-list{display:grid;gap:8px;margin-top:13px}
+.event{display:grid;grid-template-columns:72px 1fr auto;gap:10px;align-items:center;padding:10px 11px;border:1px solid rgba(147,169,183,.11);border-radius:11px;background:rgba(255,255,255,.02)}
+.event time{color:var(--cyan);font-size:11px}.event b{font-size:12px}.impact{font-size:9px;padding:5px 7px;border-radius:999px;background:rgba(239,181,91,.11);color:var(--amber)}
+
+.performance-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}
+.perf-card{padding:18px}
+.period-tabs{display:flex;gap:7px;flex-wrap:wrap}
+.period-btn{border:1px solid var(--line);background:#091721;font-size:11px;padding:8px 10px}
+.period-btn.active{border-color:var(--cyan);color:var(--cyan);background:rgba(100,215,231,.08)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:14px}
+.kpi{padding:13px;border-radius:13px;background:rgba(255,255,255,.025);border:1px solid rgba(147,169,183,.12)}
+.kpi span{display:block;color:var(--muted);font-size:10px}
+.kpi strong{display:block;margin-top:6px;font-size:22px}
+.kpi small{display:block;color:var(--muted);font-size:9px;margin-top:4px}
+.performance-table{width:100%;border-collapse:collapse;margin-top:13px}
+.performance-table th,.performance-table td{padding:10px 9px;border-bottom:1px solid rgba(32,56,75,.65);font-size:11px;text-align:right}
+.performance-table th:first-child,.performance-table td:first-child{text-align:left}
+.performance-table th{color:var(--muted);font-weight:600}
+.gain{color:var(--green)}.loss{color:var(--red)}
+.split-row{margin-top:13px}
+.split-row .label{display:flex;justify-content:space-between;gap:12px;font-size:11px;margin-bottom:6px}
+.split-row .label span{color:var(--muted)}
+.bar{height:8px;border-radius:999px;background:#102433;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--cyan))}
+.bar.green i{background:linear-gradient(90deg,var(--green),var(--cyan))}
+.bar.red i{background:linear-gradient(90deg,var(--red),var(--amber))}
+.perf-note{margin-top:13px;font-size:11px;line-height:1.65;color:var(--muted)}
+
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.stock{padding:18px}
+.stocktop{display:flex;justify-content:space-between;gap:12px}
+.stock-id{display:flex;gap:11px;align-items:flex-start}
+.rank{
+  width:38px;height:38px;border-radius:12px;background:rgba(100,215,231,.09);
+  border:1px solid rgba(100,215,231,.28);display:grid;place-items:center;color:var(--cyan);
+  font-weight:900;flex:0 0 auto
+}
+.rank.old{color:var(--violet);border-color:rgba(185,156,255,.28);background:rgba(185,156,255,.08)}
+.stock h3{margin:0;font-size:21px}.stock small{color:var(--muted)}
+.state-badge{
+  display:inline-flex;align-items:center;margin-top:7px;padding:5px 8px;border-radius:999px;
+  font-size:10px;font-weight:800;border:1px solid #31556d
+}
+.state-wait{color:#d6b86e;background:rgba(214,184,110,.08)}
+.state-active{color:#68dc9a;background:rgba(104,220,154,.09);border-color:rgba(104,220,154,.35)}
+.state-exit{color:#ff8a8a;background:rgba(255,138,138,.08);border-color:rgba(255,138,138,.35)}
+.mode{font-size:10px;padding:6px 8px;border-radius:999px;border:1px solid #31556d;color:#bcd7e5;white-space:nowrap}
+.cohort{
+  font-size:10px;padding:6px 8px;border-radius:999px;border:1px solid rgba(185,156,255,.28);
+  color:#d5c5ff;background:rgba(185,156,255,.06);white-space:nowrap;margin-top:6px;display:inline-block
+}
+.pricegrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:15px}
+.price{background:rgba(255,255,255,.026);border-radius:11px;padding:10px}
+.price span{display:block;color:var(--muted);font-size:10px}
+.price b{display:block;margin-top:5px;font-size:15px}
+.stop b{color:var(--red)}.ret.pos b{color:var(--green)}.ret.neg b{color:var(--red)}
+.timeline{margin-top:12px;padding-top:11px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 14px;color:#c5d3dc;font-size:11px}
+.progress{margin-top:10px;height:6px;background:#102433;border-radius:999px;overflow:hidden}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:999px}
+.progress-label{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;margin-top:6px}
+
+.empty{border:1px solid var(--line);border-radius:18px;background:var(--panel2);padding:30px;text-align:center;color:var(--muted)}
+.empty strong{display:block;color:#d5e4eb;font-size:18px;margin-bottom:8px}
+
+.history-wrap{border:1px solid var(--line);border-radius:18px;background:var(--panel);overflow:hidden}
+.filters{display:flex;gap:8px;flex-wrap:wrap;padding:14px;border-bottom:1px solid var(--line)}
+.filter{border:1px solid var(--line);background:#091721;color:#c5d4dd;padding:8px 11px;border-radius:10px;cursor:pointer;font-size:11px}
+.filter.active{border-color:var(--cyan);color:var(--cyan);background:rgba(100,215,231,.08)}
+.history{width:100%;border-collapse:collapse}
+.history th,.history td{padding:12px 14px;border-bottom:1px solid rgba(32,56,75,.65);text-align:left;font-size:11px}
+.history th{color:var(--muted);font-weight:600;background:#091721;position:sticky;top:0}
+.history td b{font-size:12px}.tag-stop{color:var(--red)}.tag-time{color:var(--amber)}
+
+
+.alloc-layout{display:grid;grid-template-columns:.92fr 1.08fr;gap:14px}
+.alloc-card{border:1px solid var(--line);border-radius:18px;background:var(--panel);padding:18px}
+.alloc-tabs,.count-presets{display:flex;gap:8px;flex-wrap:wrap}
+.alloc-tab,.preset{
+  border:1px solid var(--line);background:#091721;color:#c5d4dd;padding:9px 12px;border-radius:10px;cursor:pointer
+}
+.alloc-tab.active,.preset.active{border-color:var(--cyan);color:var(--cyan);background:rgba(100,215,231,.08)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.field label{display:block;color:var(--muted);font-size:10px;margin-bottom:6px}
+.field input,.field select{
+  width:100%;background:#07131c;border:1px solid var(--line);color:white;border-radius:10px;padding:12px;font-size:15px
+}
+.money-input{display:grid;grid-template-columns:auto 1fr;align-items:stretch}
+.money-input input{border-radius:0 10px 10px 0}
+.currency-badge{
+  display:grid;place-items:center;min-width:64px;padding:0 11px;border:1px solid var(--line);border-right:0;
+  border-radius:10px 0 0 10px;background:#102433;color:var(--cyan);font-weight:800;font-size:12px
+}
+.alloc-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.alloc-block{
+  padding:13px 8px;border-radius:13px;background:rgba(255,255,255,.025);
+  border:1px solid rgba(147,169,183,.12);text-align:center
+}
+.alloc-block span{display:block;color:var(--muted);font-size:9px}
+.alloc-block b{display:block;margin-top:5px;font-size:18px}
+.alloc-block.stocks b{color:var(--cyan)}.alloc-block.cash b{color:var(--amber)}
+.sleeve-strip{display:flex;height:12px;border-radius:999px;overflow:hidden;background:#102433;margin:14px 0}
+.sleeve-strip i{display:block;height:100%}
+.sleeve-strip .stocks{background:linear-gradient(90deg,var(--blue),var(--cyan))}
+.sleeve-strip .cash{background:var(--amber)}
+.pick-list{display:grid;gap:7px;margin-top:12px}
+.pick-row{
+  display:grid;grid-template-columns:46px 1fr 82px 92px 108px;gap:8px;align-items:center;
+  padding:10px;border-radius:10px;background:#091721;font-size:11px
+}
+.pick-row .r{color:var(--cyan);font-weight:900}
+.pick-row .qty{text-align:right;font-weight:800}
+.pick-row .amt{text-align:right;font-weight:800}
+.pick-row .weight{text-align:right;color:var(--muted)}
+.alloc-total{display:grid;gap:7px;margin-top:12px}
+.total-row{display:flex;justify-content:space-between;gap:14px;padding:10px 12px;border-radius:10px;background:#091721;font-size:12px}
+.total-row span{color:var(--muted)}.total-row b{text-align:right}
+.formula{color:var(--muted);font-size:11px;line-height:1.65;margin-top:12px}
+
+.footer{margin-top:38px;border-top:1px solid var(--line);padding-top:21px;color:var(--muted);font-size:11px;text-align:center}
+.weekend-only{display:none}.simulated .weekend-only{display:block}.simulated .friday-only{display:none}
+
+
+/* UI AUTHORITY v0.2 — additive only */
+.today-watch{margin-top:11px;padding:10px 12px;border-radius:11px;background:rgba(100,215,231,.045);border:1px solid rgba(100,215,231,.16);font-size:11px;line-height:1.6;color:#c7dce6}
+.today-watch span{display:block;color:var(--cyan);font-size:10px;font-weight:800;margin-bottom:4px}
+.weather-summary-lines{display:grid;gap:9px;margin-top:13px}
+.weather-summary-line{padding:10px 11px;border:1px solid rgba(147,169,183,.11);border-radius:11px;background:rgba(255,255,255,.02)}
+.weather-summary-line span{display:block;color:var(--muted);font-size:10px;margin-bottom:4px}.weather-summary-line b{font-size:12px;line-height:1.55}
+.official-events-block{margin-top:14px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,#0d1d29,#0a1721);box-shadow:var(--shadow);padding:18px}
+.official-events-head{display:flex;justify-content:space-between;gap:14px;align-items:start;margin-bottom:12px}.official-events-head h3{margin:0;font-size:19px}.official-events-head p{margin:4px 0 0;color:var(--muted);font-size:11px;line-height:1.55}
+.position-roi-summary{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.roi-card{border:1px solid rgba(147,169,183,.14);border-radius:14px;background:rgba(255,255,255,.025);padding:13px 15px}.roi-card span{display:block;color:var(--muted);font-size:10px}.roi-card strong{display:block;margin-top:5px;font-size:23px}.roi-card small{display:block;color:var(--muted);font-size:9px;margin-top:4px}.roi-note{margin:-4px 0 14px;color:var(--muted);font-size:10px;line-height:1.55}
+@media(max-width:760px){.position-roi-summary{grid-template-columns:1fr}.official-events-head{flex-direction:column}}
+
+@media(max-width:1060px){.alloc-layout{grid-template-columns:1fr}
+  .weather-grid{grid-template-columns:1fr 1fr}.weather-card:last-child{grid-column:1/-1}
+  .performance-grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:760px){
+  .topin{padding:10px 14px;flex-wrap:wrap}.brand{min-width:0;flex:1}.data-badge{display:none}
+  .nav{width:100%;margin:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr))}
+  .nav button{font-size:10px;padding:8px 2px}.wrap{padding:0 14px 40px}
+  .hero-box{grid-template-columns:1fr}.demo-btn{width:100%}.weather-grid,.cards{grid-template-columns:1fr}
+  .weather-card:last-child{grid-column:auto}.head{align-items:flex-start;flex-direction:column}
+  .pricegrid{grid-template-columns:repeat(2,1fr)}.stock{padding:15px}.hero h1{font-size:25px}
+  .kpis{grid-template-columns:1fr 1fr}.alloc-summary{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:1fr}.pick-row{grid-template-columns:38px 1fr 78px 90px}.pick-row .weight{display:none}.history-wrap{overflow:auto}.history{min-width:860px}
+  .event{grid-template-columns:62px 1fr}.impact{grid-column:2}
+}
+
+/* Official Event Watch v2 — source-linked, issuer-aware */
+.event-summary{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}.event-summary .pill{font-size:10px}
+.event-group{margin-top:12px}.event-group-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 8px;color:#dcecf2;font-weight:800;font-size:12px}.event-group-title small{color:var(--muted);font-weight:500}
+.event-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.event-card{border:1px solid rgba(147,169,183,.14);border-radius:14px;background:rgba(255,255,255,.022);padding:13px 14px;min-width:0}
+.event-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.event-time{color:var(--cyan);font-size:11px;font-weight:800;white-space:nowrap}.event-badges{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}.event-badge{font-size:9px;padding:4px 6px;border-radius:999px;border:1px solid rgba(147,169,183,.16);color:#c9dce5;background:rgba(255,255,255,.025)}.event-badge.high{color:var(--red);border-color:rgba(255,114,126,.25);background:rgba(255,114,126,.07)}.event-badge.recent{color:var(--green);border-color:rgba(95,218,157,.25);background:rgba(95,218,157,.07)}
+.event-title{margin-top:8px;font-weight:850;font-size:13px;line-height:1.45}.event-why{margin-top:6px;color:#bdd0da;font-size:10.5px;line-height:1.6}.event-index{margin-top:6px;color:var(--muted);font-size:9.5px}.event-source{margin-top:7px;color:var(--muted);font-size:9.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.event-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.event-actions a{display:inline-flex;align-items:center;gap:4px;text-decoration:none;color:var(--cyan);font-size:9.5px;font-weight:800;padding:6px 8px;border-radius:8px;border:1px solid rgba(100,215,231,.22);background:rgba(100,215,231,.055)}.event-actions a:hover{background:rgba(100,215,231,.11)}
+@media(max-width:760px){.event-grid{grid-template-columns:1fr}.event-top{align-items:flex-start}.event-summary{display:grid;grid-template-columns:1fr 1fr}}
+
 </style>
 </head>
-<body>
-<div class="header">
-  <h1>OPC 多因子選股儀表板</h1>
-  <div style="display:flex;gap:8px;align-items:center">
-    <span id="dataDate" class="status">載入中...</span>
-    <span id="dataStatus" class="status">DATA_NOT_READY</span>
+<body id="body" data-ui-authority="OPC_UI_AUTHORITY_v1.0" data-write-policy="DATA_ONLY" data-preview="CHATGPT_CLOUD_TEST_EVENTS_V2">
+<div class="top"><div class="topin">
+  <div class="brand"><div class="logo">DTS</div><div><b>鼎哥選股</b><small>每週選股與持倉追蹤</small></div></div>
+  <div class="nav">
+    <button data-go="weather">市場天氣</button>
+    <button data-go="performance">績效</button>
+    <button data-go="weekly">本週新選股</button>
+    <button data-go="allocation">資金配置</button>
+    <button data-go="active">目前持倉</button>
+    <button data-go="history">近 30 天交易</button>
   </div>
-</div>
-<div class="grid" id="dashboard">
-  <div class="card" style="text-align:center;padding:40px;color:#8b949e">載入資料中...</div>
-</div>
-<div class="disclaimer">Forward Shadow 模擬。非正式投資建議。所有價位均為模擬，不代表真實交易。</div>
+  <div class="data-badge">UI Authority v1.0 · FROZEN UI · DATA ONLY</div>
+</div></div>
+
+<main class="wrap">
+<section class="section" id="weather">
+  <div class="head">
+    <div><h2>市場天氣</h2><p>先看今天適不適合做，再往下看股票與持倉。</p></div>
+    <div class="meta"><span class="pill cyan">先看市場，再看個股</span><span class="pill" id="weatherGlobalAsof">資料截至 2026-08-27</span></div>
+  </div>
+
+  <div class="weather-grid">
+    <article class="weather-card">
+      <div class="card-head"><div><h3>臺股</h3><div class="asof" id="twWeatherAsof">0050 · 2026-08-27</div></div><span class="pill green" id="twWeatherPill">狀態參考</span></div>
+      <div class="weather-main">
+        <div class="weather-box"><span>市場天氣</span><b class="positive" id="twWeatherBoxLabel">多頭延續</b></div>
+        <div class="weather-box"><span>短線狀態</span><b class="positive" id="twWeatherState">多態擴張區</b></div>
+      </div>
+      <div class="weather-note" id="twWeatherDesc">台股持續企穩於 60MA 之上，多方架構完整。</div>
+      <div class="today-watch"><span>今天要看什麼</span><b id="twTodayWatch">偏多架構是否延續；回檔時優先觀察支撐與承接，不因單日震盪直接翻空。</b></div>
+    </article>
+
+    <article class="weather-card">
+      <div class="card-head"><div><h3>美股</h3><div class="asof" id="usWeatherAsof">SPY / QQQ · 2026-08-26</div></div><span class="pill green" id="usWeatherPill">狀態參考</span></div>
+      <div class="weather-main">
+        <div class="weather-box"><span>市場天氣</span><b class="positive" id="usWeatherBoxLabel">多頭震盪</b></div>
+        <div class="weather-box"><span>短線狀態</span><b class="caution" id="usWeatherState">高位震盪區</b></div>
+      </div>
+      <div class="weather-note" id="usWeatherDesc">美股主要指數維持多頭結構，波動率適中。</div>
+      <div class="today-watch"><span>今天要看什麼</span><b id="usTodayWatch">主要指數多頭結構是否守住；高檔震盪時新倉更重視位置，不追價。</b></div>
+    </article>
+
+    <article class="weather-card">
+      <div class="card-head"><div><h3>今天怎麼看</h3><div class="asof">交易摘要</div></div><span class="pill cyan">人話整理</span></div>
+      <div class="weather-summary-lines">
+        <div class="weather-summary-line"><span>臺股</span><b id="twWeatherSummary">偏多結構維持，優先看回檔承接。</b></div>
+        <div class="weather-summary-line"><span>美股</span><b id="usWeatherSummary">多頭但震盪，開新倉要更挑位置。</b></div>
+        <div class="weather-summary-line"><span>一句話</span><b style="color:var(--cyan)">先看市場允不允許，再看個股值不值得。</b></div>
+      </div>
+    </article>
+  </div>
+
+  <div class="official-events-block">
+    <div class="official-events-head">
+      <div><h3>近期官方重要事件</h3><p>不是便利貼：只收官方已確認事件，並提供來源與可直接查看的公布／財報頁。時間一律以臺北時間呈現。</p></div>
+      <div class="meta"><span class="pill amber">官方來源</span><span class="pill" id="eventWatchAsof">臺北時間</span></div>
+    </div>
+    <div class="event-summary" id="eventWatchSummary"></div>
+    <div id="eventWatchList"><div style="color:var(--muted);text-align:center;padding:16px;font-size:12px">載入官方事件…</div></div>
+  </div>
+</section>
+
+
+
+<section class="section" id="performance">
+  <div class="head">
+    <div>
+      <h2>績效</h2>
+      <p>上方先看近期實際表現與歷史績效，複雜的版本差異與研究進化統一放到下方。</p>
+    </div>
+    <div class="meta">
+      <span class="pill green">近期績效</span>
+      <span class="pill cyan">歷史績效</span>
+    </div>
+  </div>
+
+  <div class="performance-grid">
+    <article class="perf-card">
+      <div class="card-head">
+        <div>
+          <h3>近期績效</h3>
+          <div class="asof">近 30 天</div>
+        </div>
+        <span class="pill green">近期</span>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi"><span>完成交易</span><strong id="perfClosedCount">5</strong><small>近 30 天已結算</small></div>
+        <div class="kpi"><span>勝率</span><strong id="perfWinRate" class="negative">0.0%</strong><small id="perfWinLossSub">0 勝 · 5 負</small></div>
+        <div class="kpi"><span>平均每筆報酬</span><strong id="perfAvgReturn" class="negative">-12.61%</strong><small>近 30 天統計</small></div>
+        <div class="kpi"><span>最大單筆虧損</span><strong id="perfMaxLoss" class="negative">-14.50%</strong><small>近 30 天統計</small></div>
+      </div>
+
+      <div id="recentPerformanceTableHost" style="margin-top:14px"><table class="performance-table"><thead><tr><th>市場</th><th>近 30 天已結束</th><th>目前持倉</th><th>目前未實現</th></tr></thead><tbody>
+<tr><td>臺股</td><td>4</td><td>11</td><td class="gain">+5.24%</td></tr>
+<tr><td>美股</td><td>1</td><td>12</td><td class="gain">+0.24%</td></tr>
+</tbody></table></div>
+    </article>
+
+    <article class="perf-card">
+      <div class="card-head">
+        <div>
+          <h3>歷史績效</h3>
+          <div class="asof">歷史測試結果</div>
+        </div>
+        <span class="pill cyan">歷史</span>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi"><span>臺股策略歷史指數</span><strong id="twHistVal" class="positive">116.91</strong><small>歷史累積資產</small></div>
+        <div class="kpi"><span>臺股歷史最大回撤</span><strong id="twHistMdd" class="negative">-12.5%</strong><small>風控測試</small></div>
+        <div class="kpi"><span>美股策略歷史指數</span><strong id="usHistVal" class="positive">149.82</strong><small>歷史累積資產</small></div>
+        <div class="kpi"><span>美股歷史最大回撤</span><strong id="usHistMdd" class="negative">-13.63%</strong><small>歷史最大回撤</small></div>
+      </div>
+
+      <div class="perf-note">
+        這區展示歷史回測與擬真測試績效，實體 Production 數據隨每日與每週結算持續累積更新。
+      </div>
+    </article>
+  </div>
+
+  <div class="performance-grid" style="margin-top:14px">
+    <article class="perf-card">
+      <div class="card-head">
+        <div>
+          <h3>策略架構歷史表現</h3>
+          <div class="asof">各市場模型對照歷史展示</div>
+        </div>
+        <span class="pill">模型表現</span>
+      </div>
+
+      <table class="performance-table">
+        <thead><tr><th>模型</th><th>臺股</th><th>美股</th><th>說明</th></tr></thead>
+        <tbody id="strategyHistoryTbody">
+          <tr><td>基礎多因子對照</td><td>95.54</td><td class="gain">172.72</td><td>舊版對照基準</td></tr>
+          <tr><td><b>臺股多因子選股模型</b></td><td class="gain"><b>116.91</b></td><td class="gain">138.74</td><td>臺股主力選股模型</td></tr>
+          <tr><td><b>美股多因子選股模型</b></td><td class="loss">79.83</td><td class="gain"><b>149.82</b></td><td>美股主力選股模型</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="perf-card">
+      <div class="card-head">
+        <div>
+          <h3>新版研究進化</h3>
+          <div class="asof">市場風控與策略升級驗證</div>
+        </div>
+        <span class="pill amber">研究中</span>
+      </div>
+
+      <table class="performance-table">
+        <thead><tr><th>市場</th><th>原版</th><th>新版研究</th><th>樣本保留</th></tr></thead>
+        <tbody id="researchEvolutionTbody">
+          <tr><td>臺股</td><td>+0.2059%</td><td class="gain"><b>+0.6499%</b></td><td>77.36%</td></tr>
+          <tr><td>美股</td><td>+1.1447%</td><td class="gain"><b>+1.2531%</b></td><td>68.49%</td></tr>
+        </tbody>
+      </table>
+
+      <div class="perf-note">
+        這裡只呈現「新版研究有沒有進化」。正式網站接資料時，再決定要不要補更多研究細節。
+      </div>
+    </article>
+  </div>
+</section>
+
+
+<section class="section" id="weekly">
+  <div class="head">
+    <div><h2>本週新選股</h2><p>只顯示最新一週產生的新 Cohort。週更只更新這區，不覆蓋下面舊的 Active Position。</p></div>
+    <div class="meta"><span class="pill cyan">Latest Cohort</span><span class="pill green">ALLOW</span></div>
+  </div>
+  <div id="weeklyContent" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:24px;margin-top:16px;">
+    <div class="card" style="padding:16px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.1);">
+      <h3 style="margin-bottom:12px;color:var(--cyan,#00e5ff)">臺股本週選股</h3>
+      <div id="twWeeklyRows" style="display:flex;flex-direction:column;gap:8px;"><div class="weekly-row" style="display:flex;flex-direction:column;gap:6px;padding:12px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+<div style="display:flex;justify-content:space-between;gap:10px"><div><b>#1 6213 聯茂</b></div><span class="pill amber" style="padding:4px 7px">再入選・不加碼</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;font-size:10px;color:var(--muted)"><span>進場 NT$513</span><span>防守 NT$451</span><span>目標1 NT$619</span><span>目標2 NT$685</span></div>
+</div><div class="weekly-row" style="display:flex;flex-direction:column;gap:6px;padding:12px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+<div style="display:flex;justify-content:space-between;gap:10px"><div><b>#2 3008 大立光</b></div><span class="pill green" style="padding:4px 7px">本週新選</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;font-size:10px;color:var(--muted)"><span>進場 NT$5,610</span><span>防守 NT$4,935</span><span>目標1 NT$6,765</span><span>目標2 NT$7,490</span></div>
+</div><div class="weekly-row" style="display:flex;flex-direction:column;gap:6px;padding:12px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+<div style="display:flex;justify-content:space-between;gap:10px"><div><b>#3 3653 健策</b></div><span class="pill amber" style="padding:4px 7px">再入選・不加碼</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;font-size:10px;color:var(--muted)"><span>進場 NT$5,395</span><span>防守 NT$4,745</span><span>目標1 NT$6,505</span><span>目標2 NT$7,205</span></div>
+</div><div class="weekly-row" style="display:flex;flex-direction:column;gap:6px;padding:12px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+<div style="display:flex;justify-content:space-between;gap:10px"><div><b>#4 2603 長榮</b></div><span class="pill green" style="padding:4px 7px">本週新選</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;font-size:10px;color:var(--muted)"><span>進場 NT$251.5</span><span>防守 NT$221</span><span>目標1 NT$303.5</span><span>目標2 NT$336</span></div>
+</div><div class="weekly-row" style="display:flex;flex-direction:column;gap:6px;padding:12px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+<div style="display:flex;justify-content:space-between;gap:10px"><div><b>#5 2059 川湖</b></div><span class="pill amber" style="padding:4px 7px">再入選・不加碼</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;font-size:10px;color:var(--muted)"><span>進場 NT$13,385</span><span>防守 NT$11,775</span><span>目標1 NT$16,130</span><span>目標2 NT$17,870</span></div>
+</div><div class="weekly-row" style="display:flex;flex-direction:column;gap:6px;padding:12px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+<div style="display:flex;justify-content:space-between;gap:10px"><div><b>#6 2408 南亞科</b></div><span class="pill amber" style="padding:4px 7px">再入選・不加碼</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;font-size:10px;color:var(--muted)"><span>進場 NT$528</span><span>防守 NT$464.5</span><span>目標1 NT$636.5</span><span>目標2 NT$705</span></div>
+</div><div class="weekly-row" style="display:flex;flex-direction:column;gap:6px;padding:12px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+<div style="display:flex;justify-content:space-between;gap:10px"><div><b>#7 6446 藥華藥</b></div><span class="pill amber" style="padding:4px 7px">再入選・不加碼</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;font-size:10px;color:var(--muted)"><span>進場 NT$1,400</span><span>防守 NT$1,230</span><span>目標1 NT$1,687</span><span>目標2 NT$1,869</span></div>
+</div><div class="weekly-row" style="display:flex;flex-direction:column;gap:6px;padding:12px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+<div style="display:flex;justify-content:space-between;gap:10px"><div><b>#8 2357 華碩</b></div><span class="pill green" style="padding:4px 7px">本週新選</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;font-size:10px;color:var(--muted)"><span>進場 NT$921</span><span>防守 NT$810</span><span>目標1 NT$1,110</span><span>目標2 NT$1,230</span></div>
+</div><div class="weekly-row" style="display:flex;flex-direction:column;gap:6px;padding:12px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+<div style="display:flex;justify-content:space-between;gap:10px"><div><b>#9 9945 潤泰新</b></div><span class="pill green" style="padding:4px 7px">本週新選</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;font-size:10px;color:var(--muted)"><span>進場 NT$29.4</span><span>防守 NT$25.9</span><span>目標1 NT$35.5</span><span>目標2 NT$39.2</span></div>
+</div><div class="weekly-row" style="display:flex;flex-direction:column;gap:6px;padding:12px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+<div style="display:flex;justify-content:space-between;gap:10px"><div><b>#10 2027 大成鋼</b></div><span class="pill green" style="padding:4px 7px">本週新選</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;font-size:10px;color:var(--muted)"><span>進場 NT$50.3</span><span>防守 NT$44.2</span><span>目標1 NT$60.6</span><span>目標2 NT$67.2</span></div>
+</div></div>
+    </div>
+    <div class="card" style="padding:16px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.1);">
+      <h3 style="margin-bottom:12px;color:var(--cyan,#00e5ff)">美股本週選股</h3>
+      <div id="usWeeklyRows" style="display:flex;flex-direction:column;gap:8px;"><div class="weekly-row" style="display:flex;flex-direction:column;gap:6px;padding:12px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+<div style="display:flex;justify-content:space-between;gap:10px"><div><b>#1 NEM Newmont Corporation</b></div><span class="pill green" style="padding:4px 7px">本週新選</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;font-size:10px;color:var(--muted)"><span>進場 US$131.58</span><span>防守 US$115.79</span><span>目標1 US$158.55</span><span>目標2 US$175.66</span></div>
+</div><div class="weekly-row" style="display:flex;flex-direction:column;gap:6px;padding:12px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+<div style="display:flex;justify-content:space-between;gap:10px"><div><b>#2 FOXA Fox Corporation</b></div><span class="pill amber" style="padding:4px 7px">再入選・不加碼</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;font-size:10px;color:var(--muted)"><span>進場 US$68.54</span><span>防守 US$60.32</span><span>目標1 US$82.59</span><span>目標2 US$91.50</span></div>
+</div><div class="weekly-row" style="display:flex;flex-direction:column;gap:6px;padding:12px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+<div style="display:flex;justify-content:space-between;gap:10px"><div><b>#3 MDT Medtronic plc</b></div><span class="pill amber" style="padding:4px 7px">再入選・不加碼</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;font-size:10px;color:var(--muted)"><span>進場 US$93.35</span><span>防守 US$82.15</span><span>目標1 US$112.49</span><span>目標2 US$124.62</span></div>
+</div><div class="weekly-row" style="display:flex;flex-direction:column;gap:6px;padding:12px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+<div style="display:flex;justify-content:space-between;gap:10px"><div><b>#4 PYPL PayPal Holdings, Inc.</b></div><span class="pill amber" style="padding:4px 7px">再入選・不加碼</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;font-size:10px;color:var(--muted)"><span>進場 US$61.55</span><span>防守 US$54.16</span><span>目標1 US$74.17</span><span>目標2 US$82.17</span></div>
+</div><div class="weekly-row" style="display:flex;flex-direction:column;gap:6px;padding:12px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+<div style="display:flex;justify-content:space-between;gap:10px"><div><b>#5 LULU lululemon athletica inc.</b></div><span class="pill green" style="padding:4px 7px">本週新選</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;font-size:10px;color:var(--muted)"><span>進場 US$121.07</span><span>防守 US$106.54</span><span>目標1 US$145.89</span><span>目標2 US$161.63</span></div>
+</div><div class="weekly-row" style="display:flex;flex-direction:column;gap:6px;padding:12px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+<div style="display:flex;justify-content:space-between;gap:10px"><div><b>#6 SYK Stryker Corporation</b></div><span class="pill green" style="padding:4px 7px">本週新選</span></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;font-size:10px;color:var(--muted)"><span>進場 US$329.45</span><span>防守 US$289.92</span><span>目標1 US$396.99</span><span>目標2 US$439.82</span></div>
+</div></div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section" id="allocation">
+  <div class="head">
+    <div>
+      <h2>資金配置模擬</h2>
+      <p>輸入本金，直接換算每檔預算、整張／零股數量與預留現金。沿用現行 Production 的資金配置規則，不在這裡改策略。</p>
+    </div>
+    <div class="meta"><span class="pill cyan">Capital Allocation</span><span class="pill">即時計算</span></div>
+  </div>
+
+  <div class="alloc-layout">
+    <article class="alloc-card">
+      <div class="card-head">
+        <div><h3>設定資金</h3><div class="asof">先輸入你真的準備拿來配置的本金</div></div>
+      </div>
+
+      <div class="alloc-tabs" style="margin-top:14px">
+        <button type="button" class="alloc-tab active" data-market="TW">臺股</button>
+        <button type="button" class="alloc-tab" data-market="US">美股</button>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="capitalInput">投資本金</label>
+          <div class="money-input">
+            <span class="currency-badge" id="currencyBadge">NT$</span>
+            <input id="capitalInput" type="number" min="0" step="10000" value="5000000">
+          </div>
+        </div>
+        <div class="field">
+          <label for="stockPct">股票計畫配置</label>
+          <select id="stockPct">
+            <option value="0.50">50%</option>
+            <option value="0.60">60%</option>
+            <option value="0.70" selected>70%</option>
+            <option value="0.80">80%</option>
+            <option value="1.00">100%</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>使用前幾名選股</label>
+        <div class="count-presets">
+          <button type="button" class="preset" data-count="3">Top 3</button>
+          <button type="button" class="preset active" data-count="5">Top 5</button>
+          <button type="button" class="preset" data-count="10">Top 10</button>
+        </div>
+      </div>
+
+      <div class="alloc-summary">
+        <div class="alloc-block"><span>總本金</span><b id="sumCapital">NT$5,000,000</b></div>
+        <div class="alloc-block stocks"><span>股票計畫資金</span><b id="sumStock">NT$3,500,000</b></div>
+        <div class="alloc-block"><span>每檔目標預算</span><b id="sumEach">NT$700,000</b></div>
+        <div class="alloc-block cash"><span>預留現金</span><b id="sumCash">NT$1,500,000</b></div>
+      </div>
+
+      <div class="sleeve-strip">
+        <i class="stocks" id="stockBar" style="width:70%"></i>
+        <i class="cash" id="cashBar" style="width:30%"></i>
+      </div>
+
+      <div class="formula" id="allocationRuleText">
+        臺股顯示「整張 + 零股」建議數量，讓高價股也能看得懂需要多少股。正式版計算方式仍以現行 Production 規則為 Authority。
+      </div>
+    </article>
+
+    <article class="alloc-card">
+      <div class="card-head">
+        <div><h3>配置結果</h3><div class="asof">示意價格 · 用來測版面與計算流程</div></div>
+        <span class="pill green" id="allocationMarketLabel">臺股</span>
+      </div>
+
+      <div class="pick-list" id="allocationRows"><div class="pick-row"><div class="r">#2</div><div><b>3008</b><br><span style="color:var(--muted)">大立光</span></div><div>NT$5,610</div><div class="qty">依本金計算</div><div class="weight">目標 10%</div></div><div class="pick-row"><div class="r">#4</div><div><b>2603</b><br><span style="color:var(--muted)">長榮</span></div><div>NT$251.5</div><div class="qty">依本金計算</div><div class="weight">目標 10%</div></div><div class="pick-row"><div class="r">#8</div><div><b>2357</b><br><span style="color:var(--muted)">華碩</span></div><div>NT$921</div><div class="qty">依本金計算</div><div class="weight">目標 10%</div></div><div class="pick-row"><div class="r">#9</div><div><b>9945</b><br><span style="color:var(--muted)">潤泰新</span></div><div>NT$29.4</div><div class="qty">依本金計算</div><div class="weight">目標 10%</div></div><div class="pick-row"><div class="r">#10</div><div><b>2027</b><br><span style="color:var(--muted)">大成鋼</span></div><div>NT$50.3</div><div class="qty">依本金計算</div><div class="weight">目標 10%</div></div></div>
+
+      <div class="alloc-total">
+        <div class="total-row"><span>預估實際投入</span><b id="actualInvest">NT$0</b></div>
+        <div class="total-row"><span>計畫後剩餘現金</span><b id="actualCash">NT$0</b></div>
+      </div>
+
+      <div class="notice" style="margin-top:12px;margin-bottom:0">
+        <b>怎麼看：</b>「目標預算」是每檔希望配置多少；「建議數量」會依股價換算。臺股同時顯示整張與零股，美股直接顯示股數。
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="section" id="active">
+  <div class="head">
+    <div><h2>目前持倉</h2><p>所有還活著的交易都在這裡。來源可以是不同週 Cohort，只要還沒正式 EXIT 就不消失。</p></div>
+    <div class="meta"><span class="pill green">ACTIVE</span><span class="pill">跨週保留</span><span class="pill">每日更新</span></div>
+  </div>
+
+  <div class="position-roi-summary" id="positionRoiSummary">
+    <div class="roi-card"><span>全部持倉｜平均未實現報酬率</span><strong id="roiAll" class="positive">+2.63%</strong><small id="roiAllCount">23 檔持倉</small></div>
+    <div class="roi-card"><span>臺股持倉｜平均未實現報酬率</span><strong id="roiTw" class="positive">+5.24%</strong><small id="roiTwCount">11 檔持倉</small></div>
+    <div class="roi-card"><span>美股持倉｜平均未實現報酬率</span><strong id="roiUs" class="positive">+0.24%</strong><small id="roiUsCount">12 檔持倉</small></div>
+  </div>
+  <div class="roi-note">目前以每檔持倉等權平均呈現；原本每檔持倉資訊與交易計畫欄位全部保留，不因新增總覽而縮減。</div>
+
+  <div class="cards" id="activePositionsGrid">
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#1</div><div><h3>6213 聯茂</h3><small>臺股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-17</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>NT$475.5</b></div><div class="price"><span>最新價</span><b>NT$563</b></div><div class="price stop"><span>防守價</span><b>NT$418</b></div><div class="price ret pos"><span>未實現</span><b>+18.40%</b></div><div class="price"><span>目標 1</span><b>NT$573</b></div><div class="price"><span>目標 2</span><b>NT$635</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-17</span><span>資料最新日期 2026-08-27</span><span>持有進度 第 9 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:90.0%"></i></div><div class="progress-label"><span>Day 9</span><span>9 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#2</div><div><h3>2059 川湖</h3><small>臺股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-17</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>NT$13,750</b></div><div class="price"><span>最新價</span><b>NT$14,340</b></div><div class="price stop"><span>防守價</span><b>NT$12,100</b></div><div class="price ret pos"><span>未實現</span><b>+4.29%</b></div><div class="price"><span>目標 1</span><b>NT$16,570</b></div><div class="price"><span>目標 2</span><b>NT$18,360</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-17</span><span>資料最新日期 2026-08-27</span><span>持有進度 第 9 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:90.0%"></i></div><div class="progress-label"><span>Day 9</span><span>9 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#2</div><div><h3>3008 大立光</h3><small>臺股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-24</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>NT$5,620</b></div><div class="price"><span>最新價</span><b>NT$6,915</b></div><div class="price stop"><span>防守價</span><b>NT$4,945</b></div><div class="price ret pos"><span>未實現</span><b>+23.04%</b></div><div class="price"><span>目標 1</span><b>NT$6,775</b></div><div class="price"><span>目標 2</span><b>NT$7,505</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-24</span><span>資料最新日期 2026-08-27</span><span>持有進度 第 4 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:40.0%"></i></div><div class="progress-label"><span>Day 4</span><span>4 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#3</div><div><h3>2408 南亞科</h3><small>臺股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-17</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>NT$520</b></div><div class="price"><span>最新價</span><b>NT$541</b></div><div class="price stop"><span>防守價</span><b>NT$457.5</b></div><div class="price ret pos"><span>未實現</span><b>+4.04%</b></div><div class="price"><span>目標 1</span><b>NT$627</b></div><div class="price"><span>目標 2</span><b>NT$695</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-17</span><span>資料最新日期 2026-08-27</span><span>持有進度 第 9 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:90.0%"></i></div><div class="progress-label"><span>Day 9</span><span>9 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#4</div><div><h3>2603 長榮</h3><small>臺股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-24</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>NT$254</b></div><div class="price"><span>最新價</span><b>NT$232.5</b></div><div class="price stop"><span>防守價</span><b>NT$223.5</b></div><div class="price ret neg"><span>未實現</span><b>-8.46%</b></div><div class="price"><span>目標 1</span><b>NT$306.5</b></div><div class="price"><span>目標 2</span><b>NT$339.5</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-24</span><span>資料最新日期 2026-08-27</span><span>持有進度 第 4 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:40.0%"></i></div><div class="progress-label"><span>Day 4</span><span>4 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#5</div><div><h3>6446 藥華藥</h3><small>臺股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-17</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>NT$1,505</b></div><div class="price"><span>最新價</span><b>NT$1,560</b></div><div class="price stop"><span>防守價</span><b>NT$1,320</b></div><div class="price ret pos"><span>未實現</span><b>+3.65%</b></div><div class="price"><span>目標 1</span><b>NT$1,815</b></div><div class="price"><span>目標 2</span><b>NT$2,010</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-17</span><span>資料最新日期 2026-08-27</span><span>持有進度 第 9 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:90.0%"></i></div><div class="progress-label"><span>Day 9</span><span>9 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#6</div><div><h3>3653 健策</h3><small>臺股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-17</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>NT$5,340</b></div><div class="price"><span>最新價</span><b>NT$5,645</b></div><div class="price stop"><span>防守價</span><b>NT$4,695</b></div><div class="price ret pos"><span>未實現</span><b>+5.71%</b></div><div class="price"><span>目標 1</span><b>NT$6,435</b></div><div class="price"><span>目標 2</span><b>NT$7,130</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-17</span><span>資料最新日期 2026-08-27</span><span>持有進度 第 9 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:90.0%"></i></div><div class="progress-label"><span>Day 9</span><span>9 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#8</div><div><h3>2357 華碩</h3><small>臺股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-24</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>NT$919</b></div><div class="price"><span>最新價</span><b>NT$968</b></div><div class="price stop"><span>防守價</span><b>NT$808</b></div><div class="price ret pos"><span>未實現</span><b>+5.33%</b></div><div class="price"><span>目標 1</span><b>NT$1,110</b></div><div class="price"><span>目標 2</span><b>NT$1,230</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-24</span><span>資料最新日期 2026-08-27</span><span>持有進度 第 4 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:40.0%"></i></div><div class="progress-label"><span>Day 4</span><span>4 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#9</div><div><h3>9945 潤泰新</h3><small>臺股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-24</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>NT$29.3</b></div><div class="price"><span>最新價</span><b>NT$28.6</b></div><div class="price stop"><span>防守價</span><b>NT$25.8</b></div><div class="price ret neg"><span>未實現</span><b>-2.39%</b></div><div class="price"><span>目標 1</span><b>NT$35.4</b></div><div class="price"><span>目標 2</span><b>NT$39.1</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-24</span><span>資料最新日期 2026-08-27</span><span>持有進度 第 4 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:40.0%"></i></div><div class="progress-label"><span>Day 4</span><span>4 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#10</div><div><h3>2301 光寶科</h3><small>臺股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-17</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>NT$277</b></div><div class="price"><span>最新價</span><b>NT$301</b></div><div class="price stop"><span>防守價</span><b>NT$243.5</b></div><div class="price ret pos"><span>未實現</span><b>+8.66%</b></div><div class="price"><span>目標 1</span><b>NT$334</b></div><div class="price"><span>目標 2</span><b>NT$370</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-17</span><span>資料最新日期 2026-08-27</span><span>持有進度 第 9 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:90.0%"></i></div><div class="progress-label"><span>Day 9</span><span>9 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#10</div><div><h3>2027 大成鋼</h3><small>臺股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-24</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>NT$51</b></div><div class="price"><span>最新價</span><b>NT$48.6</b></div><div class="price stop"><span>防守價</span><b>NT$44.9</b></div><div class="price ret neg"><span>未實現</span><b>-4.61%</b></div><div class="price"><span>目標 1</span><b>NT$61.5</b></div><div class="price"><span>目標 2</span><b>NT$68.1</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-24</span><span>資料最新日期 2026-08-27</span><span>持有進度 第 4 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:40.0%"></i></div><div class="progress-label"><span>Day 4</span><span>4 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#1</div><div><h3>WDAY Workday, Inc.</h3><small>美股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-17</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>US$192.49</b></div><div class="price"><span>最新價</span><b>US$190.75</b></div><div class="price stop"><span>防守價</span><b>US$169.39</b></div><div class="price ret neg"><span>未實現</span><b>-0.90%</b></div><div class="price"><span>目標 1</span><b>US$231.95</b></div><div class="price"><span>目標 2</span><b>US$256.97</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-17</span><span>資料最新日期 2026-08-26</span><span>持有進度 第 8 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:80.0%"></i></div><div class="progress-label"><span>Day 8</span><span>8 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#1</div><div><h3>NEM Newmont Corporation</h3><small>美股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-24</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>US$133.40</b></div><div class="price"><span>最新價</span><b>US$131.60</b></div><div class="price stop"><span>防守價</span><b>US$117.39</b></div><div class="price ret neg"><span>未實現</span><b>-1.35%</b></div><div class="price"><span>目標 1</span><b>US$160.75</b></div><div class="price"><span>目標 2</span><b>US$178.09</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-24</span><span>資料最新日期 2026-08-26</span><span>持有進度 第 3 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:30.0%"></i></div><div class="progress-label"><span>Day 3</span><span>3 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#3</div><div><h3>NTAP NetApp, Inc.</h3><small>美股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-17</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>US$207.40</b></div><div class="price"><span>最新價</span><b>US$193.85</b></div><div class="price stop"><span>防守價</span><b>US$182.51</b></div><div class="price ret neg"><span>未實現</span><b>-6.53%</b></div><div class="price"><span>目標 1</span><b>US$249.92</b></div><div class="price"><span>目標 2</span><b>US$276.88</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-17</span><span>資料最新日期 2026-08-26</span><span>持有進度 第 8 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:80.0%"></i></div><div class="progress-label"><span>Day 8</span><span>8 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#4</div><div><h3>FOXA Fox Corporation</h3><small>美股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-17</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>US$68.91</b></div><div class="price"><span>最新價</span><b>US$69.60</b></div><div class="price stop"><span>防守價</span><b>US$60.64</b></div><div class="price ret pos"><span>未實現</span><b>+1.00%</b></div><div class="price"><span>目標 1</span><b>US$83.04</b></div><div class="price"><span>目標 2</span><b>US$91.99</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-17</span><span>資料最新日期 2026-08-26</span><span>持有進度 第 8 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:80.0%"></i></div><div class="progress-label"><span>Day 8</span><span>8 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#5</div><div><h3>CTSH Cognizant Technology Solutions Corporation</h3><small>美股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-17</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>US$57.56</b></div><div class="price"><span>最新價</span><b>US$62.09</b></div><div class="price stop"><span>防守價</span><b>US$50.66</b></div><div class="price ret pos"><span>未實現</span><b>+7.87%</b></div><div class="price"><span>目標 1</span><b>US$69.36</b></div><div class="price"><span>目標 2</span><b>US$76.85</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-17</span><span>資料最新日期 2026-08-26</span><span>持有進度 第 8 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:80.0%"></i></div><div class="progress-label"><span>Day 8</span><span>8 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#5</div><div><h3>LULU lululemon athletica inc.</h3><small>美股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-24</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>US$122.22</b></div><div class="price"><span>最新價</span><b>US$116.35</b></div><div class="price stop"><span>防守價</span><b>US$107.55</b></div><div class="price ret neg"><span>未實現</span><b>-4.80%</b></div><div class="price"><span>目標 1</span><b>US$147.28</b></div><div class="price"><span>目標 2</span><b>US$163.16</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-24</span><span>資料最新日期 2026-08-26</span><span>持有進度 第 3 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:30.0%"></i></div><div class="progress-label"><span>Day 3</span><span>3 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#6</div><div><h3>KKR KKR &amp; Co. Inc.</h3><small>美股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-17</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>US$112.90</b></div><div class="price"><span>最新價</span><b>US$108.50</b></div><div class="price stop"><span>防守價</span><b>US$99.35</b></div><div class="price ret neg"><span>未實現</span><b>-3.90%</b></div><div class="price"><span>目標 1</span><b>US$136.04</b></div><div class="price"><span>目標 2</span><b>US$150.72</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-17</span><span>資料最新日期 2026-08-26</span><span>持有進度 第 8 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:80.0%"></i></div><div class="progress-label"><span>Day 8</span><span>8 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#6</div><div><h3>SYK Stryker Corporation</h3><small>美股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-24</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>US$330.00</b></div><div class="price"><span>最新價</span><b>US$329.67</b></div><div class="price stop"><span>防守價</span><b>US$290.40</b></div><div class="price ret neg"><span>未實現</span><b>-0.10%</b></div><div class="price"><span>目標 1</span><b>US$397.65</b></div><div class="price"><span>目標 2</span><b>US$440.55</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-24</span><span>資料最新日期 2026-08-26</span><span>持有進度 第 3 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:30.0%"></i></div><div class="progress-label"><span>Day 3</span><span>3 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#7</div><div><h3>FDS FactSet Research Systems Inc.</h3><small>美股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-17</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>US$281.50</b></div><div class="price"><span>最新價</span><b>US$295.45</b></div><div class="price stop"><span>防守價</span><b>US$247.72</b></div><div class="price ret pos"><span>未實現</span><b>+4.96%</b></div><div class="price"><span>目標 1</span><b>US$339.21</b></div><div class="price"><span>目標 2</span><b>US$375.80</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-17</span><span>資料最新日期 2026-08-26</span><span>持有進度 第 8 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:80.0%"></i></div><div class="progress-label"><span>Day 8</span><span>8 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#8</div><div><h3>PYPL PayPal Holdings, Inc.</h3><small>美股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-17</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>US$61.01</b></div><div class="price"><span>最新價</span><b>US$61.81</b></div><div class="price stop"><span>防守價</span><b>US$53.69</b></div><div class="price ret pos"><span>未實現</span><b>+1.31%</b></div><div class="price"><span>目標 1</span><b>US$73.52</b></div><div class="price"><span>目標 2</span><b>US$81.45</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-17</span><span>資料最新日期 2026-08-26</span><span>持有進度 第 8 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:80.0%"></i></div><div class="progress-label"><span>Day 8</span><span>8 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#9</div><div><h3>MDT Medtronic plc</h3><small>美股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-17</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>US$90.89</b></div><div class="price"><span>最新價</span><b>US$92.02</b></div><div class="price stop"><span>防守價</span><b>US$79.98</b></div><div class="price ret pos"><span>未實現</span><b>+1.24%</b></div><div class="price"><span>目標 1</span><b>US$109.52</b></div><div class="price"><span>目標 2</span><b>US$121.34</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-17</span><span>資料最新日期 2026-08-26</span><span>持有進度 第 8 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:80.0%"></i></div><div class="progress-label"><span>Day 8</span><span>8 / 10</span></div>
+    </article>
+    <article class="stock">
+      <div class="stocktop"><div class="stock-id"><div class="rank old">#10</div><div><h3>WTW Willis Towers Watson Public Limited Company</h3><small>美股目前持倉</small><br><span class="state-badge state-active">ACTIVE</span></div></div><div><span class="mode">持倉中</span><br><span class="cohort">進場 2026-08-17</span></div></div>
+      <div class="pricegrid"><div class="price"><span>進場價</span><b>US$329.60</b></div><div class="price"><span>最新價</span><b>US$343.12</b></div><div class="price stop"><span>防守價</span><b>US$290.05</b></div><div class="price ret pos"><span>未實現</span><b>+4.10%</b></div><div class="price"><span>目標 1</span><b>US$397.17</b></div><div class="price"><span>目標 2</span><b>US$440.02</b></div></div>
+      <div class="timeline"><span>進場日期 2026-08-17</span><span>資料最新日期 2026-08-26</span><span>持有進度 第 8 天 / 共 10 天</span></div>
+      <div class="progress"><i style="width:80.0%"></i></div><div class="progress-label"><span>Day 8</span><span>8 / 10</span></div>
+    </article>
+  </div>
+</section>
+
+<section class="section" id="history">
+  <div class="head">
+    <div><h2>近 30 天已結束交易</h2><p>網站只顯示最近一個月。更久以前的完整資料仍保留在 Registry / Ledger / 雲端備份，不在前台無限往下堆。</p></div>
+    <div class="meta"><span class="pill">最近 30 天</span><span class="pill">超過 30 天不顯示</span><span class="pill cyan">完整資料仍保留</span></div>
+  </div>
+
+  <div class="history-wrap">
+    <div class="filters">
+      <button class="filter active">全部</button><button class="filter">臺股</button><button class="filter">美股</button>
+      <button class="filter">STOP</button><button class="filter">T+10</button>
+    </div>
+    <table class="history">
+      <thead><tr><th>股票</th><th>進場日期</th><th>進場價</th><th>出場日期</th><th>出場價</th><th>持有天數</th><th>出場原因</th><th>實現報酬</th><th>結果</th></tr></thead>
+      <tbody id="closedTradesTbody"><tr><td><b>3017</b> 奇鋐</td><td>2026-08-17</td><td>NT$714</td><td>2026-08-20</td><td>NT$632</td><td>3 天</td><td><span class="reason-tag">觸及停損</span></td><td class="loss"><b>-11.54%</b></td><td><span class="pill">已結束</span></td></tr><tr><td><b>8046</b> 南電</td><td>2026-08-17</td><td>NT$1,310</td><td>2026-08-19</td><td>NT$1,150</td><td>3 天</td><td><span class="reason-tag">觸及停損</span></td><td class="loss"><b>-12.21%</b></td><td><span class="pill">已結束</span></td></tr><tr><td><b>1303</b> 南亞</td><td>2026-08-17</td><td>NT$213.5</td><td>2026-08-19</td><td>NT$187.5</td><td>3 天</td><td><span class="reason-tag">觸及停損</span></td><td class="loss"><b>-12.18%</b></td><td><span class="pill">已結束</span></td></tr><tr><td><b>3189</b> 景碩</td><td>2026-08-17</td><td>NT$896</td><td>2026-08-25</td><td>NT$783</td><td>7 天</td><td><span class="reason-tag">觸及停損</span></td><td class="loss"><b>-12.61%</b></td><td><span class="pill">已結束</span></td></tr><tr><td><b>ZS</b> Zscaler, Inc.</td><td>2026-08-17</td><td>US$188.38</td><td>2026-08-18</td><td>US$161.06</td><td>2 天</td><td><span class="reason-tag">觸及停損</span></td><td class="loss"><b>-14.50%</b></td><td><span class="pill">已結束</span></td></tr></tbody>
+    </table>
+  </div>
+  <div class="notice" style="margin-top:14px"><b>歷史資料策略：</b> 網站只 render 最近 30 天，完整歷史交易不刪除。需要查最大回撤、單檔歷史或半年績效時，再由 AI / Python 從完整資料庫抓取。</div>
+</section>
+
+<div class="footer">鼎哥選股 · 每週選股與持倉追蹤 · 本模型僅為交易計畫，不構成個別投資建議。</div>
+</main>
+
+<!-- OPC UI AUTHORITY v1.0
+     GOVERNANCE: OWNER + ChatGPT define UI. Automated Python/AI is DATA-ONLY.
+     IMMUTABLE IN DAILY/WEEKLY DATA RUNS: HTML structure, labels, CSS, DOM ids, section order.
+     ALLOWED: bind payload values into existing fields / repeated-row templates only.
+     CONTRACT: OPC_UI_FIELD_CONTRACT_v1.0.json
+-->
+<script>window.__OPC_TEST_DATA__={"meta":{"product":"鼎哥選股","subtitle":"每週選股與持倉追蹤","as_of":"2026-08-28","tw_data_as_of":"2026-08-28","us_data_as_of":"2026-08-28","signal_date":"2026-08-29","entry_date":"2026-08-31","data_status":"OFFICIAL","generated_at":"2026-08-29T20:55:02+08:00","weather_tw_as_of":"2026-08-28","weather_us_as_of":"2026-08-28","event_watch_as_of":"2026-08-29","production_generated_at":"2026-08-29T20:55:02+08:00","production_last_success_at":"2026-08-29T20:55:02+08:00","production_health":"HEALTHY","cloud_test_mode":true,"cloud_test_note":"ChatGPT cloud test preview with official-event links; not yet Mac/runtime production.","cloud_test_generated_at":"2026-08-29T21:06:00+08:00"},"market_weather":{"tw":{"trend_state":"BULLISH_CONTINUATION","bias_score":85.0,"regime_label":"多態擴張區","summary":"台股持續企穩於 60MA 之上，多方架構完整。","updated_at":"2026-08-28","source_as_of":"2026-08-28","status":"INFORMATIONAL_NON_BLOCKING"},"us":{"trend_state":"BULLISH_NEUTRAL","bias_score":72.0,"regime_label":"高位震盪區","summary":"美股主要指數維持多頭結構，波動率適中。","updated_at":"2026-08-28","source_as_of":"2026-08-28","status":"INFORMATIONAL_NON_BLOCKING"}},"recent_performance":{"as_of":"2026-08-28","closed_trades_count_30d":20,"closed_trades_count_tw":10,"closed_trades_count_us":10,"win_count_30d":11,"loss_count_30d":9,"win_rate_30d":55.0,"avg_trade_return_30d":-0.08,"total_realized_return_30d":-1.62,"max_single_loss_30d":-14.5,"active_positions_count":8,"active_unrealized_return":0.92,"active_unrealized_return_tw":2.46,"active_unrealized_return_us":-1.67},"historical_performance":{"tw":{"model_name":"臺股 ARM C (完整風控策略)","final_value":"79.825","cagr":"-3.05%","mdd":"-35.47%","status":"ACTIVE PRODUCTION","source":"OPC-MF-020A / 10_METRIC_COMPARISON.csv"},"us":{"model_name":"美股 ARM C (完整風控與動態袖套 (正式版))","final_value":"149.825","cagr":"+11.61%","mdd":"-13.63%","status":"ACTIVE PRODUCTION","source":"OPC-MF-020A / 10_METRIC_COMPARISON.csv"}},"historical_versions":{"tw":[{"version":"ARM A","name":"舊版權重策略","final_value":"95.543","cagr":"-0.63%","mdd":"-46.28%"},{"version":"ARM B","name":"新版多因子策略 (正式版)","final_value":"116.912","cagr":"+2.17%","mdd":"-39.18%"},{"version":"ARM C","name":"完整風控策略","final_value":"79.825","cagr":"-3.05%","mdd":"-35.47%"}],"us":[{"version":"ARM A","name":"舊版美股策略","final_value":"172.722","cagr":"+16.01%","mdd":"-14.30%"},{"version":"ARM B","name":"動能過濾增強策略","final_value":"138.744","cagr":"+9.31%","mdd":"-16.93%"},{"version":"ARM C","name":"完整風控與動態袖套 (正式版)","final_value":"149.825","cagr":"+11.61%","mdd":"-13.63%"}]},"research_evolution":{"label":"Research / Historical Discovery / Not Yet Validated","tw":{"c000_expectancy":"+0.2059%","c009_expectancy":"+0.6499%","retention_rate":"77.36%"},"us":{"c000_expectancy":"+1.1447%","c009_expectancy":"+1.2531%","retention_rate":"68.49%"}},"latest_cohort":{"TW":[{"cohort_id":"TW-20260829-R01","market":"TW","rank":1,"ticker":"3008","name":"大立光","signal_date":"2026-08-29","entry_date":"2026-08-31","entry_price":0.0,"reference_price":7065.0,"canonical_price_date":"2026-08-28","status_price_asof":"2026-08-28","source_provider":"FinMind/TWSE","stop":6215.0,"tp1":8515.0,"tp2":9435.0,"trade_plan_mode":"PRE_ENTRY_PLANNED","selection_state":"RESELECTED_ACTIVE_NO_ADD","previous_trade_id":"TW-20260822-R02:3008","previous_exit_date":null,"previous_exit_reason":null,"status":"RESELECTED_ACTIVE_NO_ADD","status_label":"本週再次入選｜目前持倉中｜不再加碼","incremental_capital_allocation":0.0},{"cohort_id":"TW-20260829-R02","market":"TW","rank":2,"ticker":"6213","name":"聯茂","signal_date":"2026-08-29","entry_date":"2026-08-31","entry_price":0.0,"reference_price":582.0,"canonical_price_date":"2026-08-28","status_price_asof":"2026-08-28","source_provider":"FinMind/TWSE","stop":512.0,"tp1":702.0,"tp2":777.0,"trade_plan_mode":"PRE_ENTRY_PLANNED","selection_state":"RESELECTED_AFTER_T10_EXIT","previous_trade_id":"018A-CORR-TW-1:6213","previous_exit_date":"2026-08-28","previous_exit_reason":"T10_CLOSE","status":"WAITING_ENTRY","status_label":"待進場","incremental_capital_allocation":null},{"cohort_id":"TW-20260829-R03","market":"TW","rank":3,"ticker":"2301","name":"光寶科","signal_date":"2026-08-29","entry_date":"2026-08-31","entry_price":0.0,"reference_price":317.5,"canonical_price_date":"2026-08-28","status_price_asof":"2026-08-28","source_provider":"FinMind/TWSE","stop":279.0,"tp1":383.0,"tp2":424.0,"trade_plan_mode":"PRE_ENTRY_PLANNED","selection_state":"RESELECTED_AFTER_T10_EXIT","previous_trade_id":"018A-CORR-TW-10:2301","previous_exit_date":"2026-08-28","previous_exit_reason":"T10_CLOSE","status":"WAITING_ENTRY","status_label":"待進場","incremental_capital_allocation":null},{"cohort_id":"TW-20260829-R04","market":"TW","rank":4,"ticker":"3653","name":"健策","signal_date":"2026-08-29","entry_date":"2026-08-31","entry_price":0.0,"reference_price":5785.0,"canonical_price_date":"2026-08-28","status_price_asof":"2026-08-28","source_provider":"FinMind/TWSE","stop":5090.0,"tp1":6975.0,"tp2":7725.0,"trade_plan_mode":"PRE_ENTRY_PLANNED","selection_state":"RESELECTED_AFTER_T10_EXIT","previous_trade_id":"018A-CORR-TW-6:3653","previous_exit_date":"2026-08-28","previous_exit_reason":"T10_CLOSE","status":"WAITING_ENTRY","status_label":"待進場","incremental_capital_allocation":null},{"cohort_id":"TW-20260829-R05","market":"TW","rank":5,"ticker":"2059","name":"川湖","signal_date":"2026-08-29","entry_date":"2026-08-31","entry_price":0.0,"reference_price":14300.0,"canonical_price_date":"2026-08-28","status_price_asof":"2026-08-28","source_provider":"FinMind/TWSE","stop":12580.0,"tp1":17235.0,"tp2":19095.0,"trade_plan_mode":"PRE_ENTRY_PLANNED","selection_state":"RESELECTED_AFTER_T10_EXIT","previous_trade_id":"018A-CORR-TW-2:2059","previous_exit_date":"2026-08-28","previous_exit_reason":"T10_CLOSE","status":"WAITING_ENTRY","status_label":"待進場","incremental_capital_allocation":null},{"cohort_id":"TW-20260829-R06","market":"TW","rank":6,"ticker":"2615","name":"萬海","signal_date":"2026-08-29","entry_date":"2026-08-31","entry_price":0.0,"reference_price":111.5,"canonical_price_date":"2026-08-28","status_price_asof":"2026-08-28","source_provider":"FinMind/TWSE","stop":98.1,"tp1":134.5,"tp2":149.0,"trade_plan_mode":"PRE_ENTRY_PLANNED","selection_state":"FIRST_SELECTION","previous_trade_id":null,"previous_exit_date":null,"previous_exit_reason":null,"status":"WAITING_ENTRY","status_label":"待進場","incremental_capital_allocation":null},{"cohort_id":"TW-20260829-R07","market":"TW","rank":7,"ticker":"2324","name":"仁寶","signal_date":"2026-08-29","entry_date":"2026-08-31","entry_price":0.0,"reference_price":39.7,"canonical_price_date":"2026-08-28","status_price_asof":"2026-08-28","source_provider":"FinMind/TWSE","stop":34.9,"tp1":47.85,"tp2":53.0,"trade_plan_mode":"PRE_ENTRY_PLANNED","selection_state":"FIRST_SELECTION","previous_trade_id":null,"previous_exit_date":null,"previous_exit_reason":null,"status":"WAITING_ENTRY","status_label":"待進場","incremental_capital_allocation":null},{"cohort_id":"TW-20260829-R08","market":"TW","rank":8,"ticker":"1301","name":"台塑","signal_date":"2026-08-29","entry_date":"2026-08-31","entry_price":0.0,"reference_price":62.7,"canonical_price_date":"2026-08-28","status_price_asof":"2026-08-28","source_provider":"FinMind/TWSE","stop":55.1,"tp1":75.6,"tp2":83.8,"trade_plan_mode":"PRE_ENTRY_PLANNED","selection_state":"FIRST_SELECTION","previous_trade_id":null,"previous_exit_date":null,"previous_exit_reason":null,"status":"WAITING_ENTRY","status_label":"待進場","incremental_capital_allocation":null},{"cohort_id":"TW-20260829-R09","market":"TW","rank":9,"ticker":"1102","name":"亞泥","signal_date":"2026-08-29","entry_date":"2026-08-31","entry_price":0.0,"reference_price":34.55,"canonical_price_date":"2026-08-28","status_price_asof":"2026-08-28","source_provider":"FinMind/TWSE","stop":30.4,"tp1":41.65,"tp2":46.15,"trade_plan_mode":"PRE_ENTRY_PLANNED","selection_state":"FIRST_SELECTION","previous_trade_id":null,"previous_exit_date":null,"previous_exit_reason":null,"status":"WAITING_ENTRY","status_label":"待進場","incremental_capital_allocation":null},{"cohort_id":"TW-20260829-R10","market":"TW","rank":10,"ticker":"3706","name":"神達","signal_date":"2026-08-29","entry_date":"2026-08-31","entry_price":0.0,"reference_price":92.1,"canonical_price_date":"2026-08-28","status_price_asof":"2026-08-28","source_provider":"FinMind/TWSE","stop":81.0,"tp1":111.0,"tp2":123.0,"trade_plan_mode":"PRE_ENTRY_PLANNED","selection_state":"FIRST_SELECTION","previous_trade_id":null,"previous_exit_date":null,"previous_exit_reason":null,"status":"WAITING_ENTRY","status_label":"待進場","incremental_capital_allocation":null}],"US":[{"cohort_id":"US-20260829-R01","market":"US","rank":1,"ticker":"NEM","name":"Newmont Corporation","signal_date":"2026-08-29","entry_date":"2026-08-31","entry_price":0.0,"reference_price":127.98,"canonical_price_date":"2026-08-28","status_price_asof":"2026-08-28","source_provider":"yfinance/SEC","stop":112.62,"tp1":154.22,"tp2":170.85,"trade_plan_mode":"PRE_ENTRY_PLANNED","selection_state":"RESELECTED_ACTIVE_NO_ADD","previous_trade_id":"US-20260822-R01:NEM","previous_exit_date":null,"previous_exit_reason":null,"status":"RESELECTED_ACTIVE_NO_ADD","status_label":"本週再次入選｜目前持倉中｜不再加碼","incremental_capital_allocation":0.0},{"cohort_id":"US-20260829-R02","market":"US","rank":2,"ticker":"WDAY","name":"Workday, Inc.","signal_date":"2026-08-29","entry_date":"2026-08-31","entry_price":0.0,"reference_price":204.72,"canonical_price_date":"2026-08-28","status_price_asof":"2026-08-28","source_provider":"yfinance/SEC","stop":180.15,"tp1":246.69,"tp2":273.3,"trade_plan_mode":"PRE_ENTRY_PLANNED","selection_state":"RESELECTED_AFTER_T10_EXIT","previous_trade_id":"018A-CORR-US-1:WDAY","previous_exit_date":"2026-08-28","previous_exit_reason":"T10_CLOSE","status":"WAITING_ENTRY","status_label":"待進場","incremental_capital_allocation":null},{"cohort_id":"US-20260829-R03","market":"US","rank":3,"ticker":"LULU","name":"lululemon athletica inc.","signal_date":"2026-08-29","entry_date":"2026-08-31","entry_price":0.0,"reference_price":120.81,"canonical_price_date":"2026-08-28","status_price_asof":"2026-08-28","source_provider":"yfinance/SEC","stop":106.31,"tp1":145.58,"tp2":161.28,"trade_plan_mode":"PRE_ENTRY_PLANNED","selection_state":"RESELECTED_ACTIVE_NO_ADD","previous_trade_id":"US-20260822-R05:LULU","previous_exit_date":null,"previous_exit_reason":null,"status":"RESELECTED_ACTIVE_NO_ADD","status_label":"本週再次入選｜目前持倉中｜不再加碼","incremental_capital_allocation":0.0},{"cohort_id":"US-20260829-R04","market":"US","rank":4,"ticker":"PYPL","name":"PayPal Holdings, Inc.","signal_date":"2026-08-29","entry_date":"2026-08-31","entry_price":0.0,"reference_price":53.66,"canonical_price_date":"2026-08-28","status_price_asof":"2026-08-28","source_provider":"yfinance/SEC","stop":47.22,"tp1":64.66,"tp2":71.64,"trade_plan_mode":"PRE_ENTRY_PLANNED","selection_state":"RESELECTED_AFTER_STOP_EXIT","previous_trade_id":"018A-CORR-US-8:PYPL","previous_exit_date":"2026-08-28","previous_exit_reason":"STOP_TOUCH","status":"WAITING_ENTRY","status_label":"待進場","incremental_capital_allocation":null}]},"active_positions":[{"cohort_id":"TW-20260822-R02","market":"TW","rank":2,"ticker":"3008","name":"大立光","signal_date":"2026-08-22","entry_date":"2026-08-24","entry_price":5620.0,"status_price":7065.0,"status_price_asof":"2026-08-28","stop":4945.0,"tp1":6775.0,"tp2":7505.0,"status":"ACTIVE","status_label":"持有中","holding_day":5,"t10_exit_date":"2026-09-04","t10_progress":0.5,"unrealized_pnl":25.71,"unrealized_pnl_raw":-0.0017793594306049821},{"cohort_id":"TW-20260822-R04","market":"TW","rank":4,"ticker":"2603","name":"長榮","signal_date":"2026-08-22","entry_date":"2026-08-24","entry_price":254.0,"status_price":231.5,"status_price_asof":"2026-08-28","stop":223.5,"tp1":306.5,"tp2":339.5,"status":"ACTIVE","status_label":"持有中","holding_day":5,"t10_exit_date":"2026-09-04","t10_progress":0.5,"unrealized_pnl":-8.86,"unrealized_pnl_raw":-0.00984251968503937},{"cohort_id":"TW-20260822-R08","market":"TW","rank":8,"ticker":"2357","name":"華碩","signal_date":"2026-08-22","entry_date":"2026-08-24","entry_price":919.0,"status_price":965.0,"status_price_asof":"2026-08-28","stop":808.0,"tp1":1110.0,"tp2":1230.0,"status":"ACTIVE","status_label":"持有中","holding_day":5,"t10_exit_date":"2026-09-04","t10_progress":0.5,"unrealized_pnl":5.01,"unrealized_pnl_raw":0.002176278563656148},{"cohort_id":"TW-20260822-R09","market":"TW","rank":9,"ticker":"9945","name":"潤泰新","signal_date":"2026-08-22","entry_date":"2026-08-24","entry_price":29.3,"status_price":28.0,"status_price_asof":"2026-08-28","stop":25.75,"tp1":35.35,"tp2":39.15,"status":"ACTIVE","status_label":"持有中","holding_day":5,"t10_exit_date":"2026-09-04","t10_progress":0.5,"unrealized_pnl":-4.44,"unrealized_pnl_raw":0.0034129692832763777},{"cohort_id":"TW-20260822-R10","market":"TW","rank":10,"ticker":"2027","name":"大成鋼","signal_date":"2026-08-22","entry_date":"2026-08-24","entry_price":51.0,"status_price":48.4,"status_price_asof":"2026-08-28","stop":44.85,"tp1":61.5,"tp2":68.1,"status":"ACTIVE","status_label":"持有中","holding_day":5,"t10_exit_date":"2026-09-04","t10_progress":0.5,"unrealized_pnl":-5.1,"unrealized_pnl_raw":-0.013725490196078487},{"cohort_id":"US-20260822-R01","market":"US","rank":1,"ticker":"NEM","name":"Newmont Corporation","signal_date":"2026-08-22","entry_date":"2026-08-24","entry_price":133.4,"status_price":127.98,"status_price_asof":"2026-08-28","stop":117.39,"tp1":160.75,"tp2":178.09,"status":"ACTIVE","status_label":"持有中","holding_day":5,"t10_exit_date":"2026-09-04","t10_progress":0.5,"unrealized_pnl":-4.06,"unrealized_pnl_raw":-0.013643178410794552},{"cohort_id":"US-20260822-R05","market":"US","rank":5,"ticker":"LULU","name":"lululemon athletica inc.","signal_date":"2026-08-22","entry_date":"2026-08-24","entry_price":122.22,"status_price":120.81,"status_price_asof":"2026-08-28","stop":107.55,"tp1":147.28,"tp2":163.16,"status":"ACTIVE","status_label":"持有中","holding_day":5,"t10_exit_date":"2026-09-04","t10_progress":0.5,"unrealized_pnl":-1.15,"unrealized_pnl_raw":-0.00940926198658162},{"cohort_id":"US-20260822-R06","market":"US","rank":6,"ticker":"SYK","name":"Stryker Corporation","signal_date":"2026-08-22","entry_date":"2026-08-24","entry_price":330.0,"status_price":330.69,"status_price_asof":"2026-08-28","stop":290.4,"tp1":397.65,"tp2":440.55,"status":"ACTIVE","status_label":"持有中","holding_day":5,"t10_exit_date":"2026-09-04","t10_progress":0.5,"unrealized_pnl":0.21,"unrealized_pnl_raw":-0.001666666666666701}],"closed_trades":[{"trade_id":"TW_20260815_3017:3017","cohort_id":"TW_20260815_3017","market":"TW","ticker":"3017","name":"奇鋐","rank":1,"signal_date":"2026-08-15","entry_date":"2026-08-17","entry_price":714.0,"exit_date":"2026-08-20","exit_price":632.0,"exit_reason":"STOP_TOUCH","holding_days":3,"realized_return":-11.54,"realized_return_raw":-0.1154,"status":"CLOSED"},{"trade_id":"018A-CORR-TW-4:8046","cohort_id":"018A-CORR-TW-4","market":"TW","ticker":"8046","name":"南電","rank":4,"signal_date":"2026-08-15","entry_date":"2026-08-17","entry_price":1310.0,"exit_date":"2026-08-19","exit_price":1150.0,"exit_reason":"STOP_TOUCH","holding_days":3,"realized_return":-12.21,"realized_return_raw":-0.12210000000000001,"status":"CLOSED"},{"trade_id":"018A-CORR-TW-9:1303","cohort_id":"018A-CORR-TW-9","market":"TW","ticker":"1303","name":"南亞","rank":9,"signal_date":"2026-08-15","entry_date":"2026-08-17","entry_price":213.5,"exit_date":"2026-08-19","exit_price":187.5,"exit_reason":"STOP_TOUCH","holding_days":3,"realized_return":-12.18,"realized_return_raw":-0.12179999999999999,"status":"CLOSED"},{"trade_id":"018A-CORR-TW-8:3189","cohort_id":"018A-CORR-TW-8","market":"TW","ticker":"3189","name":"景碩","rank":8,"signal_date":"2026-08-15","entry_date":"2026-08-17","entry_price":896.0,"exit_date":"2026-08-25","exit_price":783.0,"exit_reason":"STOP_TOUCH","holding_days":7,"realized_return":-12.61,"realized_return_raw":-0.1261,"status":"CLOSED"},{"trade_id":"018A-CORR-US-2:ZS","cohort_id":"018A-CORR-US-2","market":"US","ticker":"ZS","name":"Zscaler, Inc.","rank":2,"signal_date":"2026-08-15","entry_date":"2026-08-17","entry_price":188.375,"exit_date":"2026-08-18","exit_price":161.06,"exit_reason":"STOP_TOUCH","holding_days":2,"realized_return":-14.5,"realized_return_raw":-0.145,"status":"CLOSED"},{"trade_id":"018A-CORR-TW-10:2301","cohort_id":"018A-CORR-TW-10","market":"TW","ticker":"2301","name":"光寶科","rank":10,"signal_date":"2026-08-15","entry_date":"2026-08-17","entry_price":277.0,"exit_date":"2026-08-28","exit_price":317.0,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":14.44,"realized_return_raw":0.1444,"status":"CLOSED"},{"trade_id":"018A-CORR-TW-1:6213","cohort_id":"018A-CORR-TW-1","market":"TW","ticker":"6213","name":"聯茂","rank":1,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":475.5,"exit_date":"2026-08-28","exit_price":582.0,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":22.4,"realized_return_raw":0.22399999999999998,"status":"CLOSED"},{"trade_id":"018A-CORR-TW-2:2059","cohort_id":"018A-CORR-TW-2","market":"TW","ticker":"2059","name":"川湖","rank":2,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":13750.0,"exit_date":"2026-08-28","exit_price":14300.0,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":4.0,"realized_return_raw":0.04,"status":"CLOSED"},{"trade_id":"018A-CORR-TW-3:2408","cohort_id":"018A-CORR-TW-3","market":"TW","ticker":"2408","name":"南亞科","rank":3,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":520.0,"exit_date":"2026-08-28","exit_price":540.0,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":3.85,"realized_return_raw":0.0385,"status":"CLOSED"},{"trade_id":"018A-CORR-TW-5:6446","cohort_id":"018A-CORR-TW-5","market":"TW","ticker":"6446","name":"藥華藥","rank":5,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":1505.0,"exit_date":"2026-08-28","exit_price":1545.0,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":2.66,"realized_return_raw":0.026600000000000002,"status":"CLOSED"},{"trade_id":"018A-CORR-TW-6:3653","cohort_id":"018A-CORR-TW-6","market":"TW","ticker":"3653","name":"健策","rank":6,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":5340.0,"exit_date":"2026-08-28","exit_price":5785.0,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":8.33,"realized_return_raw":0.0833,"status":"CLOSED"},{"trade_id":"018A-CORR-US-1:WDAY","cohort_id":"018A-CORR-US-1","market":"US","ticker":"WDAY","name":"Workday, Inc.","rank":1,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":192.49,"exit_date":"2026-08-28","exit_price":204.72,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":6.35,"realized_return_raw":0.0635,"status":"CLOSED"},{"trade_id":"018A-CORR-US-3:NTAP","cohort_id":"018A-CORR-US-3","market":"US","ticker":"NTAP","name":"NetApp, Inc.","rank":3,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":207.4,"exit_date":"2026-08-28","exit_price":187.02,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":-9.83,"realized_return_raw":-0.0983,"status":"CLOSED"},{"trade_id":"018A-CORR-US-4:FOXA","cohort_id":"018A-CORR-US-4","market":"US","ticker":"FOXA","name":"Fox Corporation","rank":4,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":68.91,"exit_date":"2026-08-28","exit_price":68.42,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":-0.71,"realized_return_raw":-0.0070999999999999995,"status":"CLOSED"},{"trade_id":"018A-CORR-US-5:CTSH","cohort_id":"018A-CORR-US-5","market":"US","ticker":"CTSH","name":"Cognizant Technology Solutions Corporation","rank":5,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":57.5625,"exit_date":"2026-08-28","exit_price":64.04,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":11.25,"realized_return_raw":0.1125,"status":"CLOSED"},{"trade_id":"018A-CORR-US-6:KKR","cohort_id":"018A-CORR-US-6","market":"US","ticker":"KKR","name":"KKR & Co. Inc.","rank":6,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":112.9,"exit_date":"2026-08-28","exit_price":108.68,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":-3.74,"realized_return_raw":-0.0374,"status":"CLOSED"},{"trade_id":"018A-CORR-US-7:FDS","cohort_id":"018A-CORR-US-7","market":"US","ticker":"FDS","name":"FactSet Research Systems Inc.","rank":7,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":281.5,"exit_date":"2026-08-28","exit_price":308.98,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":9.76,"realized_return_raw":0.09759999999999999,"status":"CLOSED"},{"trade_id":"018A-CORR-US-8:PYPL","cohort_id":"018A-CORR-US-8","market":"US","ticker":"PYPL","name":"PayPal Holdings, Inc.","rank":8,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":61.01,"exit_date":"2026-08-28","exit_price":53.69,"exit_reason":"STOP_TOUCH","holding_days":10,"realized_return":-12.0,"realized_return_raw":-0.12,"status":"CLOSED"},{"trade_id":"018A-CORR-US-9:MDT","cohort_id":"018A-CORR-US-9","market":"US","ticker":"MDT","name":"Medtronic plc","rank":9,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":90.89,"exit_date":"2026-08-28","exit_price":91.23,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":0.37,"realized_return_raw":0.0037,"status":"CLOSED"},{"trade_id":"018A-CORR-US-10:WTW","cohort_id":"018A-CORR-US-10","market":"US","ticker":"WTW","name":"Willis Towers Watson Public Limited Company","rank":10,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":329.6,"exit_date":"2026-08-28","exit_price":343.75,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":4.29,"realized_return_raw":0.0429,"status":"CLOSED"}],"closed_trades_30d":[{"trade_id":"TW_20260815_3017:3017","cohort_id":"TW_20260815_3017","market":"TW","ticker":"3017","name":"奇鋐","rank":1,"signal_date":"2026-08-15","entry_date":"2026-08-17","entry_price":714.0,"exit_date":"2026-08-20","exit_price":632.0,"exit_reason":"STOP_TOUCH","holding_days":3,"realized_return":-11.54,"realized_return_raw":-0.1154,"status":"CLOSED"},{"trade_id":"018A-CORR-TW-4:8046","cohort_id":"018A-CORR-TW-4","market":"TW","ticker":"8046","name":"南電","rank":4,"signal_date":"2026-08-15","entry_date":"2026-08-17","entry_price":1310.0,"exit_date":"2026-08-19","exit_price":1150.0,"exit_reason":"STOP_TOUCH","holding_days":3,"realized_return":-12.21,"realized_return_raw":-0.12210000000000001,"status":"CLOSED"},{"trade_id":"018A-CORR-TW-9:1303","cohort_id":"018A-CORR-TW-9","market":"TW","ticker":"1303","name":"南亞","rank":9,"signal_date":"2026-08-15","entry_date":"2026-08-17","entry_price":213.5,"exit_date":"2026-08-19","exit_price":187.5,"exit_reason":"STOP_TOUCH","holding_days":3,"realized_return":-12.18,"realized_return_raw":-0.12179999999999999,"status":"CLOSED"},{"trade_id":"018A-CORR-TW-8:3189","cohort_id":"018A-CORR-TW-8","market":"TW","ticker":"3189","name":"景碩","rank":8,"signal_date":"2026-08-15","entry_date":"2026-08-17","entry_price":896.0,"exit_date":"2026-08-25","exit_price":783.0,"exit_reason":"STOP_TOUCH","holding_days":7,"realized_return":-12.61,"realized_return_raw":-0.1261,"status":"CLOSED"},{"trade_id":"018A-CORR-US-2:ZS","cohort_id":"018A-CORR-US-2","market":"US","ticker":"ZS","name":"Zscaler, Inc.","rank":2,"signal_date":"2026-08-15","entry_date":"2026-08-17","entry_price":188.375,"exit_date":"2026-08-18","exit_price":161.06,"exit_reason":"STOP_TOUCH","holding_days":2,"realized_return":-14.5,"realized_return_raw":-0.145,"status":"CLOSED"},{"trade_id":"018A-CORR-TW-10:2301","cohort_id":"018A-CORR-TW-10","market":"TW","ticker":"2301","name":"光寶科","rank":10,"signal_date":"2026-08-15","entry_date":"2026-08-17","entry_price":277.0,"exit_date":"2026-08-28","exit_price":317.0,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":14.44,"realized_return_raw":0.1444,"status":"CLOSED"},{"trade_id":"018A-CORR-TW-1:6213","cohort_id":"018A-CORR-TW-1","market":"TW","ticker":"6213","name":"聯茂","rank":1,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":475.5,"exit_date":"2026-08-28","exit_price":582.0,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":22.4,"realized_return_raw":0.22399999999999998,"status":"CLOSED"},{"trade_id":"018A-CORR-TW-2:2059","cohort_id":"018A-CORR-TW-2","market":"TW","ticker":"2059","name":"川湖","rank":2,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":13750.0,"exit_date":"2026-08-28","exit_price":14300.0,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":4.0,"realized_return_raw":0.04,"status":"CLOSED"},{"trade_id":"018A-CORR-TW-3:2408","cohort_id":"018A-CORR-TW-3","market":"TW","ticker":"2408","name":"南亞科","rank":3,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":520.0,"exit_date":"2026-08-28","exit_price":540.0,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":3.85,"realized_return_raw":0.0385,"status":"CLOSED"},{"trade_id":"018A-CORR-TW-5:6446","cohort_id":"018A-CORR-TW-5","market":"TW","ticker":"6446","name":"藥華藥","rank":5,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":1505.0,"exit_date":"2026-08-28","exit_price":1545.0,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":2.66,"realized_return_raw":0.026600000000000002,"status":"CLOSED"},{"trade_id":"018A-CORR-TW-6:3653","cohort_id":"018A-CORR-TW-6","market":"TW","ticker":"3653","name":"健策","rank":6,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":5340.0,"exit_date":"2026-08-28","exit_price":5785.0,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":8.33,"realized_return_raw":0.0833,"status":"CLOSED"},{"trade_id":"018A-CORR-US-1:WDAY","cohort_id":"018A-CORR-US-1","market":"US","ticker":"WDAY","name":"Workday, Inc.","rank":1,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":192.49,"exit_date":"2026-08-28","exit_price":204.72,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":6.35,"realized_return_raw":0.0635,"status":"CLOSED"},{"trade_id":"018A-CORR-US-3:NTAP","cohort_id":"018A-CORR-US-3","market":"US","ticker":"NTAP","name":"NetApp, Inc.","rank":3,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":207.4,"exit_date":"2026-08-28","exit_price":187.02,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":-9.83,"realized_return_raw":-0.0983,"status":"CLOSED"},{"trade_id":"018A-CORR-US-4:FOXA","cohort_id":"018A-CORR-US-4","market":"US","ticker":"FOXA","name":"Fox Corporation","rank":4,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":68.91,"exit_date":"2026-08-28","exit_price":68.42,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":-0.71,"realized_return_raw":-0.0070999999999999995,"status":"CLOSED"},{"trade_id":"018A-CORR-US-5:CTSH","cohort_id":"018A-CORR-US-5","market":"US","ticker":"CTSH","name":"Cognizant Technology Solutions Corporation","rank":5,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":57.5625,"exit_date":"2026-08-28","exit_price":64.04,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":11.25,"realized_return_raw":0.1125,"status":"CLOSED"},{"trade_id":"018A-CORR-US-6:KKR","cohort_id":"018A-CORR-US-6","market":"US","ticker":"KKR","name":"KKR & Co. Inc.","rank":6,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":112.9,"exit_date":"2026-08-28","exit_price":108.68,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":-3.74,"realized_return_raw":-0.0374,"status":"CLOSED"},{"trade_id":"018A-CORR-US-7:FDS","cohort_id":"018A-CORR-US-7","market":"US","ticker":"FDS","name":"FactSet Research Systems Inc.","rank":7,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":281.5,"exit_date":"2026-08-28","exit_price":308.98,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":9.76,"realized_return_raw":0.09759999999999999,"status":"CLOSED"},{"trade_id":"018A-CORR-US-8:PYPL","cohort_id":"018A-CORR-US-8","market":"US","ticker":"PYPL","name":"PayPal Holdings, Inc.","rank":8,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":61.01,"exit_date":"2026-08-28","exit_price":53.69,"exit_reason":"STOP_TOUCH","holding_days":10,"realized_return":-12.0,"realized_return_raw":-0.12,"status":"CLOSED"},{"trade_id":"018A-CORR-US-9:MDT","cohort_id":"018A-CORR-US-9","market":"US","ticker":"MDT","name":"Medtronic plc","rank":9,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":90.89,"exit_date":"2026-08-28","exit_price":91.23,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":0.37,"realized_return_raw":0.0037,"status":"CLOSED"},{"trade_id":"018A-CORR-US-10:WTW","cohort_id":"018A-CORR-US-10","market":"US","ticker":"WTW","name":"Willis Towers Watson Public Limited Company","rank":10,"signal_date":"2026-08-14","entry_date":"2026-08-17","entry_price":329.6,"exit_date":"2026-08-28","exit_price":343.75,"exit_reason":"T10_CLOSE","holding_days":10,"realized_return":4.29,"realized_return_raw":0.0429,"status":"CLOSED"}],"cohorts":[{"market":"TW","ticker":"6213","name":"聯茂","rank":1,"signal_date":"2026-08-14","entry_date":"2026-08-17","actual_entry":475.5,"entry_price":475.5,"status_price":513.0,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"T10_EXITED","selection_state":"nan","status":"T10_EXITED","stop":418.0,"tp1":573.0,"tp2":635.0,"holding_day":10,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"2059","name":"川湖","rank":2,"signal_date":"2026-08-14","entry_date":"2026-08-17","actual_entry":13750.0,"entry_price":13750.0,"status_price":13385.0,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"T10_EXITED","selection_state":"nan","status":"T10_EXITED","stop":12100.0,"tp1":16570.0,"tp2":18360.0,"holding_day":10,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"2408","name":"南亞科","rank":3,"signal_date":"2026-08-14","entry_date":"2026-08-17","actual_entry":520.0,"entry_price":520.0,"status_price":528.0,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"T10_EXITED","selection_state":"nan","status":"T10_EXITED","stop":457.5,"tp1":627.0,"tp2":695.0,"holding_day":10,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"8046","name":"南電","rank":4,"signal_date":"2026-08-14","entry_date":"2026-08-17","actual_entry":1310.0,"entry_price":1310.0,"status_price":1135.0,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"STOPPED","selection_state":"nan","status":"STOPPED","stop":1150.0,"tp1":1580.0,"tp2":1750.0,"holding_day":10,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"6446","name":"藥華藥","rank":5,"signal_date":"2026-08-14","entry_date":"2026-08-17","actual_entry":1505.0,"entry_price":1505.0,"status_price":1400.0,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"T10_EXITED","selection_state":"nan","status":"T10_EXITED","stop":1320.0,"tp1":1815.0,"tp2":2010.0,"holding_day":10,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"3653","name":"健策","rank":6,"signal_date":"2026-08-14","entry_date":"2026-08-17","actual_entry":5340.0,"entry_price":5340.0,"status_price":5395.0,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"T10_EXITED","selection_state":"nan","status":"T10_EXITED","stop":4695.0,"tp1":6435.0,"tp2":7130.0,"holding_day":10,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"3017","name":"奇鋐","rank":7,"signal_date":"2026-08-14","entry_date":"2026-08-17","actual_entry":3230.0,"entry_price":3230.0,"status_price":2865.0,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"STOPPED","selection_state":"nan","status":"STOPPED","stop":2840.0,"tp1":3895.0,"tp2":4315.0,"holding_day":10,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"3189","name":"景碩","rank":8,"signal_date":"2026-08-14","entry_date":"2026-08-17","actual_entry":896.0,"entry_price":896.0,"status_price":811.0,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"STOPPED","selection_state":"nan","status":"STOPPED","stop":788.0,"tp1":1080.0,"tp2":1200.0,"holding_day":10,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"1303","name":"南亞","rank":9,"signal_date":"2026-08-14","entry_date":"2026-08-17","actual_entry":213.5,"entry_price":213.5,"status_price":192.0,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"STOPPED","selection_state":"nan","status":"STOPPED","stop":187.5,"tp1":257.5,"tp2":285.5,"holding_day":10,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"2301","name":"光寶科","rank":10,"signal_date":"2026-08-14","entry_date":"2026-08-17","actual_entry":277.0,"entry_price":277.0,"status_price":261.0,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"T10_EXITED","selection_state":"nan","status":"T10_EXITED","stop":243.5,"tp1":334.0,"tp2":370.0,"holding_day":10,"t10_exit_date":"2026-08-28"},{"market":"US","ticker":"WDAY","name":"Workday, Inc.","rank":1,"signal_date":"2026-08-14","entry_date":"2026-08-17","actual_entry":192.49,"entry_price":192.49,"status_price":200.01,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"T10_EXITED","selection_state":"nan","status":"T10_EXITED","stop":169.39,"tp1":231.95,"tp2":256.97,"holding_day":10,"t10_exit_date":"2026-08-28"},{"market":"US","ticker":"ZS","name":"Zscaler, Inc.","rank":2,"signal_date":"2026-08-14","entry_date":"2026-08-17","actual_entry":188.375,"entry_price":188.375,"status_price":181.745,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"STOPPED","selection_state":"nan","status":"STOPPED","stop":165.77,"tp1":226.99,"tp2":251.48,"holding_day":10,"t10_exit_date":"2026-08-28"},{"market":"US","ticker":"NTAP","name":"NetApp, Inc.","rank":3,"signal_date":"2026-08-14","entry_date":"2026-08-17","actual_entry":207.4,"entry_price":207.4,"status_price":192.27,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"T10_EXITED","selection_state":"nan","status":"T10_EXITED","stop":182.51,"tp1":249.92,"tp2":276.88,"holding_day":10,"t10_exit_date":"2026-08-28"},{"market":"US","ticker":"FOXA","name":"Fox Corporation","rank":4,"signal_date":"2026-08-14","entry_date":"2026-08-17","actual_entry":68.91,"entry_price":68.91,"status_price":68.54,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"T10_EXITED","selection_state":"nan","status":"T10_EXITED","stop":60.64,"tp1":83.04,"tp2":91.99,"holding_day":10,"t10_exit_date":"2026-08-28"},{"market":"US","ticker":"CTSH","name":"Cognizant Technology Solutions Corporation","rank":5,"signal_date":"2026-08-14","entry_date":"2026-08-17","actual_entry":57.5625,"entry_price":57.5625,"status_price":61.87,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"T10_EXITED","selection_state":"nan","status":"T10_EXITED","stop":50.66,"tp1":69.36,"tp2":76.85,"holding_day":10,"t10_exit_date":"2026-08-28"},{"market":"US","ticker":"KKR","name":"KKR & Co. Inc.","rank":6,"signal_date":"2026-08-14","entry_date":"2026-08-17","actual_entry":112.9,"entry_price":112.9,"status_price":108.48,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"T10_EXITED","selection_state":"nan","status":"T10_EXITED","stop":99.35,"tp1":136.04,"tp2":150.72,"holding_day":10,"t10_exit_date":"2026-08-28"},{"market":"US","ticker":"FDS","name":"FactSet Research Systems Inc.","rank":7,"signal_date":"2026-08-14","entry_date":"2026-08-17","actual_entry":281.5,"entry_price":281.5,"status_price":299.91,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"T10_EXITED","selection_state":"nan","status":"T10_EXITED","stop":247.72,"tp1":339.21,"tp2":375.8,"holding_day":10,"t10_exit_date":"2026-08-28"},{"market":"US","ticker":"PYPL","name":"PayPal Holdings, Inc.","rank":8,"signal_date":"2026-08-14","entry_date":"2026-08-17","actual_entry":61.01,"entry_price":61.01,"status_price":61.55,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"STOPPED","selection_state":"nan","status":"STOPPED","stop":53.69,"tp1":73.52,"tp2":81.45,"holding_day":10,"t10_exit_date":"2026-08-28"},{"market":"US","ticker":"MDT","name":"Medtronic plc","rank":9,"signal_date":"2026-08-14","entry_date":"2026-08-17","actual_entry":90.89,"entry_price":90.89,"status_price":93.35,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"T10_EXITED","selection_state":"nan","status":"T10_EXITED","stop":79.98,"tp1":109.52,"tp2":121.34,"holding_day":10,"t10_exit_date":"2026-08-28"},{"market":"US","ticker":"WTW","name":"Willis Towers Watson Public Limited Company","rank":10,"signal_date":"2026-08-14","entry_date":"2026-08-17","actual_entry":329.6,"entry_price":329.6,"status_price":341.99,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"T10_EXITED","selection_state":"nan","status":"T10_EXITED","stop":290.05,"tp1":397.17,"tp2":440.02,"holding_day":10,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"6213","name":"聯茂","rank":1,"signal_date":"2026-08-22","entry_date":"2026-08-24","actual_entry":0.0,"entry_price":0.0,"status_price":513.0,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"WAITING_ENTRY","selection_state":"nan","status":"WAITING_ENTRY","stop":0.0,"tp1":0.0,"tp2":0.0,"holding_day":5,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"3008","name":"大立光","rank":2,"signal_date":"2026-08-22","entry_date":"2026-08-24","actual_entry":5620.0,"entry_price":5620.0,"status_price":7065.0,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"ACTIVE","selection_state":"nan","status":"ACTIVE","stop":4945.0,"tp1":6775.0,"tp2":7505.0,"holding_day":5,"t10_exit_date":"2026-09-04"},{"market":"TW","ticker":"3653","name":"健策","rank":3,"signal_date":"2026-08-22","entry_date":"2026-08-24","actual_entry":0.0,"entry_price":0.0,"status_price":5395.0,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"WAITING_ENTRY","selection_state":"nan","status":"WAITING_ENTRY","stop":0.0,"tp1":0.0,"tp2":0.0,"holding_day":5,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"2603","name":"長榮","rank":4,"signal_date":"2026-08-22","entry_date":"2026-08-24","actual_entry":254.0,"entry_price":254.0,"status_price":231.5,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"ACTIVE","selection_state":"nan","status":"ACTIVE","stop":223.5,"tp1":306.5,"tp2":339.5,"holding_day":5,"t10_exit_date":"2026-09-04"},{"market":"TW","ticker":"2059","name":"川湖","rank":5,"signal_date":"2026-08-22","entry_date":"2026-08-24","actual_entry":0.0,"entry_price":0.0,"status_price":13385.0,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"WAITING_ENTRY","selection_state":"nan","status":"WAITING_ENTRY","stop":0.0,"tp1":0.0,"tp2":0.0,"holding_day":5,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"2408","name":"南亞科","rank":6,"signal_date":"2026-08-22","entry_date":"2026-08-24","actual_entry":0.0,"entry_price":0.0,"status_price":528.0,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"WAITING_ENTRY","selection_state":"nan","status":"WAITING_ENTRY","stop":0.0,"tp1":0.0,"tp2":0.0,"holding_day":5,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"6446","name":"藥華藥","rank":7,"signal_date":"2026-08-22","entry_date":"2026-08-24","actual_entry":0.0,"entry_price":0.0,"status_price":1400.0,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"WAITING_ENTRY","selection_state":"nan","status":"WAITING_ENTRY","stop":0.0,"tp1":0.0,"tp2":0.0,"holding_day":5,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"2357","name":"華碩","rank":8,"signal_date":"2026-08-22","entry_date":"2026-08-24","actual_entry":919.0,"entry_price":919.0,"status_price":965.0,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"ACTIVE","selection_state":"nan","status":"ACTIVE","stop":808.0,"tp1":1110.0,"tp2":1230.0,"holding_day":5,"t10_exit_date":"2026-09-04"},{"market":"TW","ticker":"9945","name":"潤泰新","rank":9,"signal_date":"2026-08-22","entry_date":"2026-08-24","actual_entry":29.3,"entry_price":29.3,"status_price":28.0,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"ACTIVE","selection_state":"nan","status":"ACTIVE","stop":25.75,"tp1":35.35,"tp2":39.15,"holding_day":5,"t10_exit_date":"2026-09-04"},{"market":"TW","ticker":"2027","name":"大成鋼","rank":10,"signal_date":"2026-08-22","entry_date":"2026-08-24","actual_entry":51.0,"entry_price":51.0,"status_price":48.4,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"ACTIVE","selection_state":"nan","status":"ACTIVE","stop":44.85,"tp1":61.5,"tp2":68.1,"holding_day":5,"t10_exit_date":"2026-09-04"},{"market":"US","ticker":"NEM","name":"Newmont Corporation","rank":1,"signal_date":"2026-08-22","entry_date":"2026-08-24","actual_entry":133.4,"entry_price":133.4,"status_price":127.98,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"ACTIVE","selection_state":"nan","status":"ACTIVE","stop":117.39,"tp1":160.75,"tp2":178.09,"holding_day":5,"t10_exit_date":"2026-09-04"},{"market":"US","ticker":"FOXA","name":"Fox Corporation","rank":2,"signal_date":"2026-08-22","entry_date":"2026-08-24","actual_entry":0.0,"entry_price":0.0,"status_price":68.54,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"WAITING_ENTRY","selection_state":"nan","status":"WAITING_ENTRY","stop":0.0,"tp1":0.0,"tp2":0.0,"holding_day":5,"t10_exit_date":"2026-08-28"},{"market":"US","ticker":"MDT","name":"Medtronic plc","rank":3,"signal_date":"2026-08-22","entry_date":"2026-08-24","actual_entry":0.0,"entry_price":0.0,"status_price":93.35,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"WAITING_ENTRY","selection_state":"nan","status":"WAITING_ENTRY","stop":0.0,"tp1":0.0,"tp2":0.0,"holding_day":5,"t10_exit_date":"2026-08-28"},{"market":"US","ticker":"PYPL","name":"PayPal Holdings, Inc.","rank":4,"signal_date":"2026-08-22","entry_date":"2026-08-24","actual_entry":0.0,"entry_price":0.0,"status_price":61.55,"status_price_asof":"2026-08-21","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"WAITING_ENTRY","selection_state":"nan","status":"WAITING_ENTRY","stop":0.0,"tp1":0.0,"tp2":0.0,"holding_day":5,"t10_exit_date":"2026-08-28"},{"market":"US","ticker":"LULU","name":"lululemon athletica inc.","rank":5,"signal_date":"2026-08-22","entry_date":"2026-08-24","actual_entry":122.22,"entry_price":122.22,"status_price":120.81,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"ACTIVE","selection_state":"nan","status":"ACTIVE","stop":107.55,"tp1":147.28,"tp2":163.16,"holding_day":5,"t10_exit_date":"2026-09-04"},{"market":"US","ticker":"SYK","name":"Stryker Corporation","rank":6,"signal_date":"2026-08-22","entry_date":"2026-08-24","actual_entry":330.0,"entry_price":330.0,"status_price":330.69,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"ACTIVE","selection_state":"nan","status":"ACTIVE","stop":290.4,"tp1":397.65,"tp2":440.55,"holding_day":5,"t10_exit_date":"2026-09-04"},{"market":"TW","ticker":"3008","name":"大立光","rank":1,"signal_date":"2026-08-29","entry_date":"2026-08-24","actual_entry":5620.0,"entry_price":5620.0,"status_price":7065.0,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"ACTIVE","selection_state":"RESELECTED_ACTIVE_NO_ADD","status":"ACTIVE","stop":4945.0,"tp1":6775.0,"tp2":7505.0,"holding_day":5,"t10_exit_date":"2026-09-04"},{"market":"TW","ticker":"6213","name":"聯茂","rank":2,"signal_date":"2026-08-29","entry_date":"2026-08-31","actual_entry":0.0,"entry_price":0.0,"status_price":582.0,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"WAITING_ENTRY","selection_state":"RESELECTED_AFTER_T10_EXIT","status":"WAITING_ENTRY","stop":512.0,"tp1":702.0,"tp2":777.0,"holding_day":0,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"2301","name":"光寶科","rank":3,"signal_date":"2026-08-29","entry_date":"2026-08-31","actual_entry":0.0,"entry_price":0.0,"status_price":317.5,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"WAITING_ENTRY","selection_state":"RESELECTED_AFTER_T10_EXIT","status":"WAITING_ENTRY","stop":279.0,"tp1":383.0,"tp2":424.0,"holding_day":0,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"3653","name":"健策","rank":4,"signal_date":"2026-08-29","entry_date":"2026-08-31","actual_entry":0.0,"entry_price":0.0,"status_price":5785.0,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"WAITING_ENTRY","selection_state":"RESELECTED_AFTER_T10_EXIT","status":"WAITING_ENTRY","stop":5090.0,"tp1":6975.0,"tp2":7725.0,"holding_day":0,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"2059","name":"川湖","rank":5,"signal_date":"2026-08-29","entry_date":"2026-08-31","actual_entry":0.0,"entry_price":0.0,"status_price":14300.0,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"WAITING_ENTRY","selection_state":"RESELECTED_AFTER_T10_EXIT","status":"WAITING_ENTRY","stop":12580.0,"tp1":17235.0,"tp2":19095.0,"holding_day":0,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"2615","name":"萬海","rank":6,"signal_date":"2026-08-29","entry_date":"2026-08-31","actual_entry":0.0,"entry_price":0.0,"status_price":111.5,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"WAITING_ENTRY","selection_state":"FIRST_SELECTION","status":"WAITING_ENTRY","stop":98.1,"tp1":134.5,"tp2":149.0,"holding_day":0,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"2324","name":"仁寶","rank":7,"signal_date":"2026-08-29","entry_date":"2026-08-31","actual_entry":0.0,"entry_price":0.0,"status_price":39.7,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"WAITING_ENTRY","selection_state":"FIRST_SELECTION","status":"WAITING_ENTRY","stop":34.9,"tp1":47.85,"tp2":53.0,"holding_day":0,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"1301","name":"台塑","rank":8,"signal_date":"2026-08-29","entry_date":"2026-08-31","actual_entry":0.0,"entry_price":0.0,"status_price":62.7,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"WAITING_ENTRY","selection_state":"FIRST_SELECTION","status":"WAITING_ENTRY","stop":55.1,"tp1":75.6,"tp2":83.8,"holding_day":0,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"1102","name":"亞泥","rank":9,"signal_date":"2026-08-29","entry_date":"2026-08-31","actual_entry":0.0,"entry_price":0.0,"status_price":34.55,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"WAITING_ENTRY","selection_state":"FIRST_SELECTION","status":"WAITING_ENTRY","stop":30.4,"tp1":41.65,"tp2":46.15,"holding_day":0,"t10_exit_date":"2026-08-28"},{"market":"TW","ticker":"3706","name":"神達","rank":10,"signal_date":"2026-08-29","entry_date":"2026-08-31","actual_entry":0.0,"entry_price":0.0,"status_price":92.1,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"WAITING_ENTRY","selection_state":"FIRST_SELECTION","status":"WAITING_ENTRY","stop":81.0,"tp1":111.0,"tp2":123.0,"holding_day":0,"t10_exit_date":"2026-08-28"},{"market":"US","ticker":"NEM","name":"Newmont Corporation","rank":1,"signal_date":"2026-08-29","entry_date":"2026-08-24","actual_entry":133.4,"entry_price":133.4,"status_price":127.98,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"ACTIVE","selection_state":"RESELECTED_ACTIVE_NO_ADD","status":"ACTIVE","stop":117.39,"tp1":160.75,"tp2":178.09,"holding_day":5,"t10_exit_date":"2026-09-04"},{"market":"US","ticker":"WDAY","name":"Workday, Inc.","rank":2,"signal_date":"2026-08-29","entry_date":"2026-08-31","actual_entry":0.0,"entry_price":0.0,"status_price":204.72,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"WAITING_ENTRY","selection_state":"RESELECTED_AFTER_T10_EXIT","status":"WAITING_ENTRY","stop":180.15,"tp1":246.69,"tp2":273.3,"holding_day":0,"t10_exit_date":"2026-08-28"},{"market":"US","ticker":"LULU","name":"lululemon athletica inc.","rank":3,"signal_date":"2026-08-29","entry_date":"2026-08-24","actual_entry":122.22,"entry_price":122.22,"status_price":120.81,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"ACTIVE","selection_state":"RESELECTED_ACTIVE_NO_ADD","status":"ACTIVE","stop":107.55,"tp1":147.28,"tp2":163.16,"holding_day":5,"t10_exit_date":"2026-09-04"},{"market":"US","ticker":"PYPL","name":"PayPal Holdings, Inc.","rank":4,"signal_date":"2026-08-29","entry_date":"2026-08-31","actual_entry":0.0,"entry_price":0.0,"status_price":53.66,"status_price_asof":"2026-08-28","trade_plan_mode":"POST_ENTRY_ACTUAL","entry_state":"WAITING_ENTRY","selection_state":"RESELECTED_AFTER_STOP_EXIT","status":"WAITING_ENTRY","stop":47.22,"tp1":64.66,"tp2":71.64,"holding_day":0,"t10_exit_date":"2026-08-28"}],"capital_allocation":{"tw_sleeve":"0050","default_us_mode":"QQQ","single_stock_target_pct":10.0,"stock_cap_pct":70.0,"cash_pct":3.0,"tw_count":5,"us_count":3,"active_count":8},"allocation":{"tw_sleeve":"0050","default_us_mode":"QQQ","single_stock_target_pct":10.0,"stock_cap_pct":70.0,"cash_pct":3.0,"tw_count":5,"us_count":3,"active_count":8},"performance":{"as_of":"2026-08-28","closed_trades_count_30d":20,"closed_trades_count_tw":10,"closed_trades_count_us":10,"win_count_30d":11,"loss_count_30d":9,"win_rate_30d":55.0,"avg_trade_return_30d":-0.08,"total_realized_return_30d":-1.62,"max_single_loss_30d":-14.5,"active_positions_count":8,"active_unrealized_return":0.92,"active_unrealized_return_tw":2.46,"active_unrealized_return_us":-1.67},"rules":{"risk_cap":"1.0%","position_cap":"10%"},"market_context":{"as_of":"2026-08-28","status":"INFORMATIONAL_NON_BLOCKING"},"event_watch":{"as_of":"2026-08-29","status":"INFORMATIONAL_NON_BLOCKING","source_status":"OFFICIAL_SOURCE_CONNECTED","source":"OFFICIAL_GOVERNMENT_AND_ISSUER_IR","timezone":"Asia/Taipei","recent_days_back":7,"forward_days":30,"policy":"OFFICIAL_CONFIRMED_ONLY","events":[{"status":"RECENT_RELEASED","category":"美股財報","market":"US","ticker":"NVDA","importance":"HIGH","local_display":"08/26 美股盤後","title":"NVIDIA Q2 FY2027 財報已公布","why_it_matters":"AI / 半導體權值核心，會直接牽動 QQQ、SPY 與全球科技風險偏好。","index_relevance":"QQQ / SPY 核心權值","source":"NVIDIA Investor Relations","source_url":"https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-Announces-Financial-Results-for-Second-Quarter-Fiscal-2027/default.aspx","report_url":"https://investor.nvidia.com/news/press-release-details/2026/NVIDIA-Announces-Financial-Results-for-Second-Quarter-Fiscal-2027/default.aspx","report_label":"查看財報"},{"status":"RECENT_RELEASED","category":"美股財報","market":"US","ticker":"CRM","importance":"MEDIUM","local_display":"08/26 美股盤後","title":"Salesforce Q2 FY2027 財報已公布","why_it_matters":"道瓊 30 成分股與大型軟體權值，財測與企業 AI 支出訊號會影響大型科技股評價。","index_relevance":"Dow 30 / SPY","source":"Salesforce Investor Relations","source_url":"https://investor.salesforce.com/news/news-details/2026/Salesforce-Delivers-Record-Second-Quarter-Fiscal-2027-Results/default.aspx","report_url":"https://investor.salesforce.com/overview/default.aspx","report_label":"財報 / IR"},{"status":"UPCOMING_CONFIRMED","category":"美國總經","market":"US","importance":"MEDIUM","local_display":"09/01 22:00","title":"美國 JOLTS 職缺報告（7月）","why_it_matters":"勞動需求與離職率會影響市場對薪資壓力、景氣與 Fed 路徑的判斷。","index_relevance":"SPY / QQQ / Dow 30","source":"U.S. Bureau of Labor Statistics","source_url":"https://www.bls.gov/schedule/2026/09_sched_list.htm","report_url":"https://www.bls.gov/news.release/jolts.htm","report_label":"公布頁"},{"status":"UPCOMING_CONFIRMED","category":"美股財報","market":"US","ticker":"AVGO","importance":"HIGH","local_display":"09/03 05:00","title":"Broadcom Q3 FY2026 財報／法說","why_it_matters":"AI 網通、半導體與基礎設施大型權值；官方已定 9/2 美股盤後公布，5:00 PM ET 法說。","index_relevance":"QQQ / SPY 大型權值","source":"Broadcom Investor Relations","source_url":"https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announce-third-quarter-fiscal-year-2026-financial","report_url":"https://investors.broadcom.com/financial-information/quarterly-results","report_label":"季度財報頁"},{"status":"UPCOMING_CONFIRMED","category":"聯準會","market":"US","importance":"MEDIUM","local_display":"09/03 02:00","title":"Federal Reserve Beige Book（褐皮書）","why_it_matters":"Fed 轄區景氣、就業、價格與企業活動的第一線摘要，是 9 月 FOMC 前的重要背景資料。","index_relevance":"美股 / 美債 / 美元","source":"Federal Reserve","source_url":"https://www.federalreserve.gov/newsevents/2026-september.htm","report_url":"https://www.federalreserve.gov/monetarypolicy/publications/beige-book-default.htm","report_label":"褐皮書"},{"status":"UPCOMING_CONFIRMED","category":"美國總經","market":"US","importance":"HIGH","local_display":"09/04 20:30","title":"美國就業報告／非農（8月）","why_it_matters":"就業、失業率與薪資是 Fed 利率路徑的核心輸入，通常會直接放大股、債、匯波動。","index_relevance":"SPY / QQQ / Dow 30","source":"U.S. Bureau of Labor Statistics","source_url":"https://www.bls.gov/schedule/news_release/empsit.htm","report_url":"https://www.bls.gov/news.release/empsit.htm","report_label":"公布頁"},{"status":"UPCOMING_CONFIRMED","category":"台股權值","market":"TW","ticker":"2317","importance":"MEDIUM","local_display":"09/05","title":"鴻海 2026 年 8 月自結合併營收","why_it_matters":"0050 / 臺股大型權值與 AI 伺服器供應鏈核心，月營收可快速反映出貨與旺季動能。","index_relevance":"0050 / 臺股權值","source":"鴻海科技集團 Investor Relations","source_url":"https://www.honhai.com/zh-tw/investor-relations/investor-relations-activities/event-calendar?year=2026","report_url":"https://www.honhai.com/zh-tw/investor-relations/financial-information/reports?section=monthly","report_label":"月營收 / IR"},{"status":"UPCOMING_CONFIRMED","category":"台股權值","market":"TW","ticker":"2330","importance":"HIGH","local_display":"09/10 13:30","title":"台積電 2026 年 8 月營業額報告","why_it_matters":"臺股最大權值股，直接影響 0050 / 0052 與半導體鏈；月營收是需求與產能利用的重要高頻訊號。","index_relevance":"0050 / 0052 核心權值","source":"TSMC Investor Relations","source_url":"https://investor.tsmc.com/chinese/financial-calendar","report_url":"https://investor.tsmc.com/chinese/monthly-revenue/2026","report_label":"營收報告"},{"status":"UPCOMING_CONFIRMED","category":"美國總經","market":"US","importance":"HIGH","local_display":"09/10 20:30","title":"美國 PPI 生產者物價指數（8月）","why_it_matters":"觀察上游通膨與企業成本壓力，會影響 CPI / 利率預期與估值敏感型科技股。","index_relevance":"SPY / QQQ / 美債 / 美元","source":"U.S. Bureau of Labor Statistics","source_url":"https://www.bls.gov/schedule/news_release/ppi.htm","report_url":"https://www.bls.gov/news.release/ppi.htm","report_label":"公布頁"},{"status":"UPCOMING_CONFIRMED","category":"美國總經","market":"US","importance":"HIGH","local_display":"09/11 20:30","title":"美國 CPI 消費者物價指數（8月）","why_it_matters":"核心通膨讀數之一，會直接改變市場對 Fed 降息／升息機率與長端利率的定價。","index_relevance":"SPY / QQQ / Dow 30 / 美債 / 美元","source":"U.S. Bureau of Labor Statistics","source_url":"https://www.bls.gov/schedule/news_release/cpi.htm","report_url":"https://www.bls.gov/news.release/cpi.htm","report_label":"公布頁"},{"status":"UPCOMING_CONFIRMED","category":"美國總經","market":"US","importance":"HIGH","local_display":"09/16 20:30","title":"美國零售銷售（8月）","why_it_matters":"直接觀察消費與內需強弱；公布時間緊鄰 FOMC，可能快速改變市場對景氣與政策的定價。","index_relevance":"SPY / QQQ / Dow 30","source":"U.S. Census Bureau","source_url":"https://www.census.gov/retail/release_schedule.html","report_url":"https://www.census.gov/retail/index.html","report_label":"零售銷售頁"},{"status":"UPCOMING_CONFIRMED","category":"聯準會","market":"US","importance":"HIGH","local_display":"09/17 02:00","title":"FOMC 利率決策＋經濟預測（SEP）","why_it_matters":"9/15–9/16 會議，9/16 2:00 PM ET 聲明、2:30 PM ET 記者會；本次同時更新經濟預測。","index_relevance":"全球股債匯 / SPY / QQQ / Dow 30","source":"Federal Reserve","source_url":"https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm","report_url":"https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm","report_label":"FOMC 官方頁"},{"status":"UPCOMING_CONFIRMED_TIME_TBD","category":"臺灣央行","market":"TW","importance":"HIGH","local_display":"09/17 時間待公告","title":"臺灣央行第 3 季理監事聯席會議","why_it_matters":"利率、匯率與房市／信用政策訊號會影響臺股金融、內需與新臺幣資金面。","index_relevance":"0050 / 0052 / 臺股 / 新臺幣","source":"中央銀行（臺灣）","source_url":"https://www.cbc.gov.tw/en/cp-448-189515-f1342-2.html","report_url":"https://www.cbc.gov.tw/en/lp-448-2.html","report_label":"央行新聞稿"},{"status":"UPCOMING_CONFIRMED","category":"美股財報","market":"US","ticker":"COST","importance":"MEDIUM","local_display":"09/25 05:00","title":"Costco Q4 FY2026 財報／法說","why_it_matters":"大型消費權值與 QQQ / SPY 重要成分；同店銷售、會員與消費力可提供美國內需的企業端訊號。","index_relevance":"QQQ / SPY 大型權值","source":"Costco Investor Relations","source_url":"https://investor.costco.com/events-and-presentations/","report_url":"https://investor.costco.com/events-and-presentations/events/event-details/2026/Q4-2026-Earnings-Call/default.aspx","report_label":"財報法說"}]}};</script>
 <script>
-async function load() {
-  try {
-    const r = await fetch('data/latest.json');
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const d = await r.json();
-    render(d);
-  } catch(e) {
-    document.getElementById('dashboard').innerHTML =
-      '<div class="card"><div class="data-notice">DATA_NOT_READY — 無法載入 latest.json<br>最後嘗試: ' + new Date().toLocaleString('zh-TW') + '<br>錯誤: ' + e.message + '</div></div>';
-    document.getElementById('dataStatus').textContent = 'ERROR';
-    document.getElementById('dataStatus').className = 'status blocked';
+// OPC UI Authority v1.0 — Application Logic & Field Binding
+// Governance: OWNER + ChatGPT UI Authority. DATA_ONLY in production.
+// Field Contract: OPC_UI_FIELD_CONTRACT_v1.0.json
+
+let DATA = null;
+let allocMarket = 'TW';
+let allocCount = 5;
+let historyFilter = 'ALL';
+
+// Traditional Chinese Enum Mappings strictly per OPC_UI_FIELD_CONTRACT_v1.0
+const WEATHER_TREND_ZH_MAP = {
+  "BULLISH_CONTINUATION": "多頭延續",
+  "BULLISH_NEUTRAL": "多頭震盪",
+  "BULLISH": "偏多",
+  "NEUTRAL": "中性整理",
+  "BEARISH_NEUTRAL": "空頭震盪",
+  "BEARISH_CONTINUATION": "空頭延續",
+  "BEARISH": "偏空",
+  "INFORMATIONAL": "狀態參考",
+  "UNKNOWN": "狀態待確認"
+};
+
+const WEATHER_STATUS_ZH_MAP = {
+  "INFORMATIONAL_NON_BLOCKING": "狀態參考",
+  "HEALTHY": "資料正常",
+  "STALE": "資料待更新",
+  "DATA_PENDING": "等待資料",
+  "UNKNOWN": "狀態待確認"
+};
+
+const TODAY_WATCH_ZH_MAP = {
+  "BULLISH_CONTINUATION": "偏多架構是否延續；回檔優先觀察支撐與承接，不因單日震盪直接翻空。",
+  "BULLISH_NEUTRAL": "多頭結構是否守住；高檔震盪時新倉更重視位置，不追價。",
+  "BULLISH": "偏多架構是否持續；新倉仍以位置與風控為先。",
+  "NEUTRAL": "方向不明時降低主觀預設，等待結構更清楚。",
+  "BEARISH_NEUTRAL": "反彈是否有承接；新多單保守，優先控制曝險。",
+  "BEARISH_CONTINUATION": "空方結構是否延續；避免逆勢追多，先看風險。",
+  "UNKNOWN": "資料狀態待確認，暫不依市場天氣做方向判斷。"
+};
+
+const IMPORTANCE_ZH_MAP = {
+  "HIGH": "高關注",
+  "MID": "中關注",
+  "MEDIUM": "中關注",
+  "LOW": "一般",
+  "UNKNOWN": "待確認"
+};
+
+const OFFICIAL_SOURCE_ZH_MAP = {
+  "BLS": "美國勞工統計局（BLS）",
+  "Federal Reserve": "美國聯準會（Federal Reserve）",
+  "FED": "美國聯準會（Federal Reserve）",
+  "BEA": "美國經濟分析局（BEA）",
+  "Census": "美國人口普查局（Census Bureau）"
+};
+
+const SELECTION_STATE_ZH_MAP = {
+  "RESELECTED_ACTIVE_NO_ADD": "再次入選・持倉中・不加碼",
+  "RESELECTED_AFTER_T10_EXIT": "T+10 結束後再次入選",
+  "RESELECTED_AFTER_STOP_EXIT": "前次停損後再次入選",
+  "FIRST_SELECTION": "本週首次入選",
+  "NEW": "本週新選",
+  "NEW_SELECTION": "本週新選",
+  "SELECTED": "本週新選",
+  "NEW_CANDIDATE": "本週新選",
+  "UNKNOWN": "狀態待確認"
+};
+
+const POSITION_STATUS_ZH_MAP = {
+  "ACTIVE": "持倉中",
+  "CLOSED": "已結束",
+  "UNKNOWN": "狀態待確認"
+};
+
+const EXIT_REASON_ZH_MAP = {
+  "STOP_TOUCH": "觸及停損",
+  "STOP_GAP_OPEN": "開盤跌破防守價",
+  "T10_EXIT": "持有期滿",
+  "T10_CLOSE": "持有期滿",
+  "TIME_EXIT": "持有期滿",
+  "TP1_TOUCH": "觸及目標 1",
+  "TP2_TOUCH": "觸及目標 2",
+  "TAKE_PROFIT": "停利出場",
+  "UNKNOWN": "其他已結束原因"
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  fetchData();
+  setupEventListeners();
+});
+
+async function fetchData() {
+  DATA = window.__OPC_TEST_DATA__;
+  if (!DATA) {
+    console.error('Embedded test payload missing');
+    return;
+  }
+  renderAll();
+}
+
+function setupEventListeners() {
+  document.querySelectorAll('[data-go]').forEach(b => {
+    b.addEventListener('click', () => {
+      const target = document.getElementById(b.dataset.go);
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  document.querySelectorAll('.filter').forEach(f => {
+    f.addEventListener('click', () => {
+      document.querySelectorAll('.filter').forEach(x => x.classList.remove('active'));
+      f.classList.add('active');
+      const txt = f.textContent.trim();
+      if (txt.includes('臺股')) historyFilter = 'TW';
+      else if (txt.includes('美股')) historyFilter = 'US';
+      else if (txt.includes('STOP')) historyFilter = 'STOP';
+      else if (txt.includes('T+10')) historyFilter = 'T+10';
+      else historyFilter = 'ALL';
+      renderClosedTrades();
+    });
+  });
+
+  document.querySelectorAll('.alloc-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      allocMarket = btn.dataset.market;
+      document.querySelectorAll('.alloc-tab').forEach(x => x.classList.toggle('active', x === btn));
+      const capInput = document.getElementById('capitalInput');
+      if (capInput) {
+        capInput.value = allocMarket === 'TW' ? '5000000' : '100000';
+        capInput.step = allocMarket === 'TW' ? '10000' : '1000';
+      }
+      renderAllocation();
+    });
+  });
+
+  document.querySelectorAll('.preset').forEach(btn => {
+    btn.addEventListener('click', () => {
+      allocCount = Number(btn.dataset.count);
+      document.querySelectorAll('.preset').forEach(x => x.classList.toggle('active', x === btn));
+      renderAllocation();
+    });
+  });
+
+  const capInput = document.getElementById('capitalInput');
+  if (capInput) capInput.addEventListener('input', renderAllocation);
+
+  const pctSelect = document.getElementById('stockPct');
+  if (pctSelect) pctSelect.addEventListener('change', renderAllocation);
+}
+
+function renderAll() {
+  if (!DATA) return;
+  renderWeather();
+  renderEventWatch();
+  renderRecentPerformance();
+  renderHistoricalPerformance();
+  renderStrategyHistoryAndResearch();
+  renderLatestCohort();
+  renderAllocation();
+  renderActivePositions();
+  renderClosedTrades();
+}
+
+const setTxt = (id, val) => {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+};
+
+// ---- Section 1: Market Weather ----
+function renderWeather() {
+  const w = DATA.market_weather || {};
+  const globalAsof = DATA.meta?.tw_data_as_of || DATA.meta?.as_of || '資料暫時無法取得';
+  
+  setTxt('weatherGlobalAsof', `資料截至 ${globalAsof}`);
+
+  if (w.tw) {
+    const twAsof = w.tw.source_as_of || w.tw.updated_at || DATA.meta?.weather_tw_as_of || globalAsof;
+    setTxt('twWeatherAsof', `0050 · ${twAsof}`);
+    setTxt('twWeatherPill', WEATHER_STATUS_ZH_MAP[w.tw.status] || w.tw.status_label || '狀態參考');
+    
+    const twTrend = w.tw.trend_state || 'UNKNOWN';
+    setTxt('twWeatherBoxLabel', WEATHER_TREND_ZH_MAP[twTrend] || '狀態待確認');
+    
+    const twRegime = w.tw.regime_label || twTrend;
+    setTxt('twWeatherState', WEATHER_TREND_ZH_MAP[twRegime] || twRegime || '狀態待確認');
+    
+    setTxt('twWeatherDesc', w.tw.summary || '台股維持多方結構，允許建立新多單部位。');
+    setTxt('twTodayWatch', TODAY_WATCH_ZH_MAP[twTrend] || '偏多架構是否延續；回檔時優先觀察支撐與承接，不因單日震盪直接翻空。');
+    setTxt('twWeatherSummary', w.tw.summary || '偏多結構維持，優先看回檔承接。');
+  } else {
+    setTxt('twWeatherAsof', '資料暫時無法取得');
+    setTxt('twWeatherState', '狀態待確認');
+    setTxt('twWeatherDesc', '資料暫時無法取得');
+  }
+
+  if (w.us) {
+    const usAsof = DATA.meta?.us_data_as_of || w.us.source_as_of || w.us.updated_at || globalAsof;
+    setTxt('usWeatherAsof', `SPY / QQQ · ${usAsof}`);
+    setTxt('usWeatherPill', WEATHER_STATUS_ZH_MAP[w.us.status] || w.us.status_label || '狀態參考');
+    
+    const usTrend = w.us.trend_state || 'UNKNOWN';
+    setTxt('usWeatherBoxLabel', WEATHER_TREND_ZH_MAP[usTrend] || '狀態待確認');
+    
+    const usRegime = w.us.regime_label || usTrend;
+    setTxt('usWeatherState', WEATHER_TREND_ZH_MAP[usRegime] || usRegime || '狀態待確認');
+    
+    setTxt('usWeatherDesc', w.us.summary || '美股主要指數維持多頭結構，波動率適中。');
+    setTxt('usTodayWatch', TODAY_WATCH_ZH_MAP[usTrend] || '主要指數多頭結構是否守住；高檔震盪時新倉更重視位置，不追價。');
+    setTxt('usWeatherSummary', w.us.summary || '多頭但震盪，開新倉要更挑位置。');
+  } else {
+    setTxt('usWeatherAsof', '資料暫時無法取得');
+    setTxt('usWeatherState', '狀態待確認');
+    setTxt('usWeatherDesc', '資料暫時無法取得');
   }
 }
 
-function render(d) {
-  document.getElementById('dataDate').textContent = d.data_date || 'N/A';
-  const st = d.data_limitations?.t86_available ? 'PARTIAL' : 'BLOCKED';
-  document.getElementById('dataStatus').textContent = st;
-  document.getElementById('dataStatus').className = 'status ' + (st === 'BLOCKED' ? 'blocked' : 'ready');
+// ---- Section 2: Official Events ----
+function renderEventWatch() {
+  const ew = DATA.event_watch || {};
+  const events = Array.isArray(ew.events) ? ew.events : [];
+  const host = document.getElementById('eventWatchList');
+  const summary = document.getElementById('eventWatchSummary');
+  if (!host) return;
 
-  const r = d.market_weather || {};
-  const p = d.portfolio || {};
-  const s = d.top_signals || {};
-  const pos = d.positions || [];
-  const eq = d.equity_curve || [];
-  const ch = d.daily_changes || {};
-  const po = d.path_overview || {};
+  setTxt('eventWatchAsof', `截至 ${ew.as_of || DATA.meta?.event_watch_as_of || DATA.meta?.as_of || '—'} · 臺北時間`);
 
-  const regimeClass = (r.regime === 'BULL') ? 'bull' : (r.regime === 'BEAR' ? 'bear' : 'sideways');
-  const regimeLabel = (r.regime === 'BULL') ? '偏多' : (r.regime === 'BEAR' ? '偏空' : '震盪');
+  if (events.length === 0) {
+    if (summary) summary.innerHTML = '<span class="pill">0 個事件</span>';
+    host.innerHTML = '<div style="color:var(--muted);text-align:center;padding:16px;font-size:12px">近期沒有已由官方確認、且達到重要性門檻的事件</div>';
+    return;
+  }
 
-  const equityStart = eq.length > 0 ? eq[0].equity : 10000000;
-  const equityNow = eq.length > 0 ? eq[eq.length-1].equity : 10000000;
-  const totalReturn = ((equityNow - equityStart) / equityStart * 100).toFixed(2);
-  const eqBars = eq.map((e,i) => {
-    const h = Math.max(2, ((e.equity - 9500000) / 500000) * 100);
-    return '<div class="equity-bar"><div class="fill" style="width:' + h + '%"></div></div><span style="font-size:9px;color:#8b949e">' + e.date.slice(5) + ' $' + (e.equity/1000000).toFixed(2) + 'M</span>';
-  }).join('');
+  const recent = events.filter(ev => ev.status === 'RECENT_RELEASED');
+  const upcoming = events.filter(ev => ev.status !== 'RECENT_RELEASED');
+  const earnings = events.filter(ev => String(ev.category || '').includes('財報'));
+  const tw = events.filter(ev => ev.market === 'TW');
+  const us = events.filter(ev => ev.market === 'US');
+  if (summary) {
+    summary.innerHTML = `
+      <span class="pill cyan">未來 30 天 ${upcoming.length}</span>
+      <span class="pill green">最近已公布 ${recent.length}</span>
+      <span class="pill amber">大型股財報 ${earnings.length}</span>
+      <span class="pill">TW ${tw.length} · US ${us.length}</span>
+    `;
+  }
 
-  const posHtml = pos.map(px => {
-    const pnlClass = px.pnl_pct >= 0 ? 'pnl-pos' : 'pnl-neg';
-    return '<div class="pos-card">' +
-      '<div style="display:flex;justify-content:space-between">' +
-      '<span><span class="code">' + px.code + '</span> <span class="name">' + (px.name||'') + '</span></span>' +
-      '<span class="path path-' + (px.path||'PATH_A').slice(-1).toLowerCase() + '">' + (px.path||'') + '</span>' +
-      '</div>' +
-      '<div style="display:flex;justify-content:space-between;margin-top:4px">' +
-      '<span>成本 $' + (px.entry_price||0).toFixed(1) + ' → 現價 $' + (px.current_price||0).toFixed(1) + '</span>' +
-      '<span class="' + pnlClass + '">' + (px.pnl_pct >= 0 ? '+' : '') + (px.pnl_pct||0).toFixed(1) + '%</span>' +
-      '</div>' +
-      '<div style="font-size:10px;color:#8b949e;margin-top:2px">進場 ' + (px.entry_date||'') + ' | ' + (px.industry||'') + ' | 預期退場 ' + (px.exit_due||'') + '</div>' +
-      '</div>';
-  }).join('');
-
-  const html = `
-    <div class="card">
-      <h2>市場天氣</h2>
-      <div class="weather-row">
-        <div class="weather-item"><div class="val ${regimeClass}">${regimeLabel}</div><div class="lbl">市場狀態</div></div>
-        <div class="weather-item"><div class="val">${r.breadth_pct||'--'}%</div><div class="lbl">市場廣度</div></div>
-        <div class="weather-item"><div class="val">${r.top_sectors?.slice(0,2).join(', ')||'--'}</div><div class="lbl">強勢產業</div></div>
-        <div class="weather-item"><div class="val">${r.weak_sectors?.slice(0,2).join(', ')||'--'}</div><div class="lbl">弱勢產業</div></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>三路徑總覽</h2>
-      <div class="path-overview">
-        ${Object.entries(po).map(([k,v])=>`
-          <div class="path-chip">
-            <div class="pc">${v.selected||0}/${v.signals||0}</div>
-            <div style="color:#8b949e;font-size:10px">${v.label||k}</div>
-            <div style="font-size:10px">入選/候選</div>
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const safeUrl = (u) => /^https:\/\//i.test(String(u || '')) ? String(u) : '';
+  const renderCard = (ev) => {
+    const high = ev.importance === 'HIGH';
+    const statusLabel = ev.status === 'RECENT_RELEASED' ? '已公布' : (ev.status === 'UPCOMING_CONFIRMED_TIME_TBD' ? '日期已確認' : '官方已確認');
+    const reportUrl = safeUrl(ev.report_url);
+    const sourceUrl = safeUrl(ev.source_url);
+    return `
+      <article class="event-card">
+        <div class="event-top">
+          <div class="event-time">${esc(ev.local_display || [ev.date, ev.time].filter(Boolean).join(' '))}</div>
+          <div class="event-badges">
+            <span class="event-badge ${high ? 'high' : ''}">${esc(high ? '高關注' : '中關注')}</span>
+            <span class="event-badge ${ev.status === 'RECENT_RELEASED' ? 'recent' : ''}">${esc(statusLabel)}</span>
+            <span class="event-badge">${esc(ev.category || '官方事件')}</span>
           </div>
-        `).join('')}
-      </div>
-    </div>
+        </div>
+        <div class="event-title">${esc(ev.title || '')}</div>
+        <div class="event-why">${esc(ev.why_it_matters || '')}</div>
+        ${ev.index_relevance ? `<div class="event-index">影響範圍：${esc(ev.index_relevance)}</div>` : ''}
+        <div class="event-source">來源：${esc(ev.source || '官方來源')}</div>
+        <div class="event-actions">
+          ${sourceUrl ? `<a href="${esc(sourceUrl)}" target="_blank" rel="noopener noreferrer">官方來源 ↗</a>` : ''}
+          ${reportUrl ? `<a href="${esc(reportUrl)}" target="_blank" rel="noopener noreferrer">${esc(ev.report_label || '查看資料')} ↗</a>` : ''}
+        </div>
+      </article>
+    `;
+  };
 
-    <div class="card">
-      <h2>Forward Shadow 模擬持倉 (${pos.length} 檔)</h2>
-      ${d.data_limitations?.ohlcv_coverage ? '<div class="data-notice" style="font-size:10px;padding:6px;margin-bottom:8px">OHLCV 覆蓋率：' + d.data_limitations.ohlcv_coverage + '（資料補齊中）</div>' : ''}
-      ${posHtml || '<div style="color:#8b949e;font-size:12px">尚無模擬持倉</div>'}
-    </div>
+  const group = (title, note, list) => list.length ? `
+    <div class="event-group">
+      <div class="event-group-title"><span>${title}</span><small>${note}</small></div>
+      <div class="event-grid">${list.map(renderCard).join('')}</div>
+    </div>` : '';
 
-    <div class="card">
-      <h2>十大觀察 — PATH_A 資金輪動領漲</h2>
-      ${(s.PATH_A||[]).slice(0,5).map((x,i)=>`
-        <div class="signal-row"><span class="code">${x.code}</span><span class="name">${x.name||''}</span><span class="path path-a">PATH_A</span><span class="score">${typeof x.score==='number'?x.score.toFixed(1):x.score}</span></div>
-      `).join('')||'<div style="color:#8b949e;font-size:12px">暫無訊號</div>'}
-      <div style="margin-top:10px;border-top:1px solid #21262d;padding-top:8px">
-        <h2 style="margin-bottom:6px">PATH_B 底部轉強</h2>
-        ${(s.PATH_B||[]).slice(0,3).map((x,i)=>`
-          <div class="signal-row"><span class="code">${x.code}</span><span class="name">${x.name||''}</span><span class="path path-b">PATH_B</span><span class="score">${typeof x.score==='number'?x.score.toFixed(1):x.score}</span></div>
-        `).join('')||'<div style="color:#8b949e;font-size:12px">暫無訊號</div>'}
-      </div>
-      <div style="margin-top:10px;border-top:1px solid #21262d;padding-top:8px">
-        <h2 style="margin-bottom:6px">PATH_C 個股異常發動</h2>
-        ${(s.PATH_C||[]).slice(0,2).map((x,i)=>`
-          <div class="signal-row"><span class="code">${x.code}</span><span class="name">${x.name||''}</span><span class="path path-c">PATH_C</span><span class="score">${typeof x.score==='number'?x.score.toFixed(1):x.score}</span></div>
-        `).join('')||'<div style="color:#8b949e;font-size:12px">暫無訊號</div>'}
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>每日變化</h2>
-      <div class="changes">
-        <span class="add">+${ch.new_entries||0} 新增</span> &nbsp;
-        <span class="hold">${ch.continued_holds||0} 續持</span> &nbsp;
-        <span>${ch.downgraded||0} 降級</span> &nbsp;
-        <span class="remove">-${ch.removed||0} 移除</span>
-      </div>
-      <div style="font-size:10px;color:#8b949e;margin-top:6px">拒絕原因: ${Object.entries(ch.rejection_reasons||{}).map(([k,v])=>k+':'+v).join(', ')||'無'}</div>
-    </div>
-
-    <div class="card">
-      <h2>模型成績</h2>
-      <div class="metrics">
-        <div class="metric"><div class="num ${totalReturn>=0?'bull':'bear'}">${totalReturn>=0?'+':''}${totalReturn}%</div><div class="lab">累積報酬</div></div>
-        <div class="metric"><div class="num">${p.completed_rt||0}</div><div class="lab">完成交易</div></div>
-        <div class="metric"><div class="num">${p.open_rt||p.total_positions||0}</div><div class="lab">未平倉</div></div>
-        <div class="metric"><div class="num">$${(p.equity/1000000).toFixed(2)}M</div><div class="lab">模擬權益</div></div>
-      </div>
-      <div class="equity-chart">
-        <div style="color:#8b949e;margin-bottom:4px">Forward Shadow Equity Curve</div>
-        ${eqBars}
-      </div>
-      <div style="font-size:10px;color:#8b949e;text-align:center;margin-top:6px">起始資金 $10M | 僅 2 日資料 | 累積中</div>
-    </div>
-
-    <div class="card">
-      <h2>資料狀態</h2>
-      <div style="font-size:12px">
-        <div>資料日期: ${d.data_date||'N/A'}</div>
-        <div>更新時間: ${d.updated||'N/A'}</div>
-        <div>T86 (法人): ${d.data_limitations?.t86_available?'✅':'❌'}</div>
-        <div>MI_INDEX (產業): ${d.data_limitations?.mi_index_available?'✅':'❌'}</div>
-        <div>OHLCV: ${d.data_limitations?.ohlcv_coverage||'N/A'}</div>
-        <div style="margin-top:8px;color:#8b949e">${d.disclaimer||''}</div>
-      </div>
-    </div>
-  `;
-
-  document.getElementById('dashboard').innerHTML = html;
+  host.innerHTML =
+    group('即將公布', '官方已確認 · 未來 30 天', upcoming) +
+    group('最近剛公布', '避免漏掉大型權值股財報', recent);
 }
 
-load();
+// ---- Section 3: Performance ----
+function renderRecentPerformance() {
+  const p = DATA.recent_performance || {};
+  const closedList = DATA.closed_trades_30d || DATA.closed_trades || [];
+
+  setTxt('perfClosedCount', p.closed_trades_count_30d ?? closedList.length);
+  setTxt('perfWinRate', `${p.win_rate_30d ?? 0}%`);
+  setTxt('perfWinLossSub', `${p.win_count_30d ?? 0} 勝 · ${p.loss_count_30d ?? 0} 負`);
+  
+  const avgRet = p.avg_trade_return_30d ?? 0;
+  setTxt('perfAvgReturn', `${avgRet > 0 ? '+' : ''}${avgRet}%`);
+  setTxt('perfMaxLoss', `${p.max_single_loss_30d ?? 0}%`);
+
+  const host = document.getElementById('recentPerformanceTableHost');
+  if (host) {
+    const twClosed = closedList.filter(x => x.market === 'TW');
+    const usClosed = closedList.filter(x => x.market === 'US');
+    const active = DATA.active_positions || [];
+    const twActive = active.filter(x => x.market === 'TW');
+    const usActive = active.filter(x => x.market === 'US');
+
+    const twActiveMeanPnl = twActive.length > 0
+      ? (twActive.reduce((sum, x) => sum + (Number(x.unrealized_pnl) || 0), 0) / twActive.length).toFixed(2)
+      : '0.00';
+    const usActiveMeanPnl = usActive.length > 0
+      ? (usActive.reduce((sum, x) => sum + (Number(x.unrealized_pnl) || 0), 0) / usActive.length).toFixed(2)
+      : '0.00';
+
+    host.innerHTML = `
+      <table class="performance-table">
+        <thead><tr><th>市場</th><th>近 30 天已結束</th><th>目前持倉</th><th>目前未實現</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>臺股</td>
+            <td>${p.closed_trades_count_tw ?? twClosed.length} 筆</td>
+            <td>${twActive.length} 檔</td>
+            <td class="${Number(twActiveMeanPnl) >= 0 ? 'gain' : 'loss'}">${Number(twActiveMeanPnl) > 0 ? '+' : ''}${twActiveMeanPnl}%</td>
+          </tr>
+          <tr>
+            <td>美股</td>
+            <td>${p.closed_trades_count_us ?? usClosed.length} 筆</td>
+            <td>${usActive.length} 檔</td>
+            <td class="${Number(usActiveMeanPnl) >= 0 ? 'gain' : 'loss'}">${Number(usActiveMeanPnl) > 0 ? '+' : ''}${usActiveMeanPnl}%</td>
+          </tr>
+        </tbody>
+      </table>
+    `;
+  }
+}
+
+function renderHistoricalPerformance() {
+  const hp = DATA.historical_performance || {};
+  const pctText = (v, fallback) => {
+    const s = String(v ?? fallback);
+    return s.endsWith('%') ? s : `${s}%`;
+  };
+  if (hp.tw) {
+    setTxt('twHistVal', hp.tw.final_value ?? '116.91');
+    setTxt('twHistMdd', pctText(hp.tw.mdd, '-12.5'));
+  }
+  if (hp.us) {
+    setTxt('usHistVal', hp.us.final_value ?? '149.82');
+    setTxt('usHistMdd', pctText(hp.us.mdd, '-13.63'));
+  }
+}
+
+function renderStrategyHistoryAndResearch() {
+  const versions = DATA.historical_versions || {};
+  const host = document.getElementById('strategyHistoryTbody');
+  if (host) {
+    const tw = versions.tw || [];
+    const us = versions.us || [];
+    const rows = [];
+    const maxLen = Math.max(tw.length, us.length);
+    for (let i = 0; i < maxLen; i++) {
+      const t = tw[i] || {};
+      const u = us[i] || {};
+      const label = t.version || u.version || `版本 ${i+1}`;
+      const desc = [t.name, u.name].filter(Boolean).join(' / ');
+      rows.push(`<tr><td><b>${label}</b></td><td>${t.final_value ?? '—'}</td><td>${u.final_value ?? '—'}</td><td>${desc || '—'}</td></tr>`);
+    }
+    if (rows.length) host.innerHTML = rows.join('');
+  }
+
+  const r = DATA.research_evolution || {};
+  const rh = document.getElementById('researchEvolutionTbody');
+  if (rh && (r.tw || r.us)) {
+    const mk = (name, x) => `<tr><td>${name}</td><td>${x?.c000_expectancy ?? '—'}</td><td class="gain"><b>${x?.c009_expectancy ?? '—'}</b></td><td>${x?.retention_rate ?? '—'}</td></tr>`;
+    rh.innerHTML = mk('臺股', r.tw) + mk('美股', r.us);
+  }
+}
+
+// ---- Section 4: Weekly Selection (latest_cohort) ----
+function renderLatestCohort() {
+  const lc = DATA.latest_cohort || {};
+  const sigDateAsof = DATA.meta?.signal_date || DATA.meta?.as_of || '最新';
+  setTxt('weeklySignalDateAsof', sigDateAsof);
+  const activeByTicker = Object.fromEntries((DATA.active_positions || []).map(x => [x.ticker, x]));
+
+  const renderMarket = (market, rowsId) => {
+    const picks = lc[market] || [];
+    const host = document.getElementById(rowsId);
+    if (!host) return;
+    const curr = market === 'TW' ? 'NT$' : 'US$';
+    const locale = market === 'TW' ? 'zh-TW' : 'en-US';
+    const num = v => Number(v).toLocaleString(locale, {maximumFractionDigits:2});
+
+    host.innerHTML = picks.map(r => {
+      const badgeText = SELECTION_STATE_ZH_MAP[r.selection_state] || r.status_label || '本週入選';
+      const active = r.selection_state === 'RESELECTED_ACTIVE_NO_ADD' ? activeByTicker[r.ticker] : null;
+
+      if (active) {
+        return `
+          <div class="weekly-row" style="display:flex;flex-direction:column;gap:6px;padding:12px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+              <span style="font-weight:bold;font-size:16px"><span style="color:var(--cyan,#64d7e7)">#${r.rank}</span> ${r.ticker} ${r.name || r.ticker}</span>
+              <span class="badge badge-active" style="padding:4px 10px;border-radius:6px;font-size:12px;background:rgba(69,211,173,0.15);color:#45d3ad;font-weight:bold">${badgeText}</span>
+            </div>
+            <div style="font-size:12px;color:var(--muted,#93a9b7);margin-top:2px">本週再次入選，但沿用原持倉管理；不建立第二筆部位、不加碼。</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:var(--muted,#93a9b7);margin-top:4px">
+              <div>本週參考價：<b style="color:var(--text)">${curr}${num(r.reference_price)}</b></div>
+              <div>實際進場價：<b style="color:var(--text)">${curr}${num(active.entry_price)}</b></div>
+              <div>目前防守價：<b style="color:var(--red,#ff727e)">${curr}${num(active.stop)}</b></div>
+              <div>目前 P1：<b style="color:var(--green,#45d3ad)">${curr}${num(active.tp1)}</b></div>
+              <div>目前 P2：<b style="color:var(--cyan,#64d7e7)">${curr}${num(active.tp2)}</b></div>
+              <div>最新價：<b style="color:var(--text)">${curr}${num(active.status_price)}</b></div>
+            </div>
+          </div>`;
+      }
+
+      const ref = Number(r.reference_price);
+      const stop = Number(r.stop);
+      const p1 = Number(r.tp1);
+      const p2 = Number(r.tp2);
+      const valid = [ref, stop, p1, p2].every(v => Number.isFinite(v) && v > 0);
+      if (!valid) {
+        return `<div class="weekly-row" style="padding:12px;border:1px solid rgba(255,114,126,.35);border-radius:12px;color:var(--red,#ff727e)"><b>#${r.rank} ${r.ticker} ${r.name || ''}</b><br>交易計畫資料異常，已停止顯示錯誤價格。</div>`;
+      }
+      return `
+        <div class="weekly-row" style="display:flex;flex-direction:column;gap:6px;padding:12px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(255,255,255,0.06);">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+            <span style="font-weight:bold;font-size:16px"><span style="color:var(--cyan,#64d7e7)">#${r.rank}</span> ${r.ticker} ${r.name || r.ticker}</span>
+            <span class="badge badge-active" style="padding:4px 10px;border-radius:6px;font-size:12px;background:rgba(69,211,173,0.15);color:#45d3ad;font-weight:bold">${badgeText}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:var(--muted,#93a9b7);margin-top:4px">
+            <div>參考價：<b style="color:var(--text)">${curr}${num(ref)}</b></div>
+            <div>預估防守價：<b style="color:var(--red,#ff727e)">${curr}${num(stop)}</b></div>
+            <div>預估目標一 (P1)：<b style="color:var(--green,#45d3ad)">${curr}${num(p1)}</b></div>
+            <div>預估目標二 (P2)：<b style="color:var(--cyan,#64d7e7)">${curr}${num(p2)}</b></div>
+          </div>
+        </div>`;
+    }).join('');
+  };
+
+  renderMarket('TW', 'twWeeklyRows');
+  renderMarket('US', 'usWeeklyRows');
+}
+
+// ---- Section 5: Allocation Simulator ----
+const fmt = (v, currency) => {
+  if (currency === 'NT$') return 'NT$' + Math.round(v).toLocaleString('zh-TW');
+  return 'US$' + Number(v).toLocaleString('en-US', { maximumFractionDigits: 0 });
+};
+
+function renderAllocation() {
+  const capInput = document.getElementById('capitalInput');
+  const capital = Math.max(0, Number(capInput ? capInput.value : 0) || 0);
+
+  const stockSelect = document.getElementById('stockPct');
+  const userStockPct = stockSelect ? Number(stockSelect.value) * 100 : 70;
+
+  const singleTargetPct = DATA?.capital_allocation?.single_stock_target_pct || 10;
+  const cashPct = DATA?.capital_allocation?.cash_pct || 3;
+  const currency = allocMarket === 'TW' ? 'NT$' : 'US$';
+
+  const rawPicks = (DATA?.latest_cohort?.[allocMarket]) || [];
+  const eligiblePicks = rawPicks.filter(p => p.selection_state !== 'RESELECTED_ACTIVE_NO_ADD' && p.incremental_capital_allocation !== 0);
+  const actualCount = Math.min(allocCount, eligiblePicks.length);
+  const picks = eligiblePicks.slice(0, actualCount);
+
+  const stockPct = Math.min(actualCount * singleTargetPct, userStockPct);
+  const eachPct = actualCount > 0 ? stockPct / actualCount : 0;
+  const sleevePct = Math.max(0, 100 - stockPct - cashPct);
+
+  const stockBudget = capital * (stockPct / 100);
+  const eachBudget = actualCount > 0 ? stockBudget / actualCount : 0;
+
+  const sleeveName = (allocMarket === 'TW' ? DATA?.capital_allocation?.tw_sleeve : DATA?.capital_allocation?.default_us_mode) || (allocMarket === 'TW' ? '0050' : 'QQQ');
+
+  setTxt('currencyBadge', currency);
+  setTxt('sumCapital', fmt(capital, currency));
+  setTxt('sumStock', fmt(stockBudget, currency));
+  setTxt('sumEach', fmt(eachBudget, currency));
+  setTxt('sumCash', fmt(capital * (cashPct / 100), currency));
+
+  const sBar = document.getElementById('stockBar');
+  if (sBar) sBar.style.width = stockPct + '%';
+  const cBar = document.getElementById('cashBar');
+  if (cBar) cBar.style.width = cashPct + '%';
+
+  setTxt('allocationMarketLabel', allocMarket === 'TW' ? '臺股' : '美股');
+
+  setTxt('allocationRuleText', 
+    allocMarket === 'TW'
+      ? `前 ${actualCount} 檔合規選股，每檔以 ${singleTargetPct}% 為目標，股票區共 ${stockPct}%；剩餘 ${sleevePct}% 進 ${sleeveName} Sleeve，保留 ${cashPct}% 現金。高價股清楚呈現「整張 + 零股」。`
+      : `美股前 ${actualCount} 檔合規選股，股票區共 ${stockPct}%，每檔約 ${eachPct.toFixed(1)}%；剩餘 ${sleevePct}% 進 ${sleeveName} Sleeve，保留 ${cashPct}% 現金。以整股數顯示。`
+  );
+
+  let actualInvested = 0;
+  const host = document.getElementById('allocationRows');
+  if (!host) return;
+  host.innerHTML = '';
+
+  if (picks.length === 0) {
+    host.innerHTML = '<div style="color:var(--muted);text-align:center;padding:16px">本週無可新增之合規股票部位（皆為既有持倉不再加碼）</div>';
+  } else {
+    picks.forEach(r => {
+      const price = r.reference_price || r.entry_price || r.status_price || 0;
+      let qtyText = '', amount = 0;
+      if (allocMarket === 'TW') {
+        const shares = Math.floor(eachBudget / price);
+        const lots = Math.floor(shares / 1000);
+        const odd = shares % 1000;
+        amount = shares * price;
+        qtyText = (lots > 0 && odd > 0) ? `${lots} 張 + ${odd} 股` : (lots > 0 ? `${lots} 張` : `${odd} 股`);
+      } else {
+        const shares = Math.floor(eachBudget / price);
+        amount = shares * price;
+        qtyText = `${shares} 股`;
+      }
+      actualInvested += amount;
+      const row = document.createElement('div');
+      row.className = 'pick-row';
+      row.innerHTML = `
+        <span class="r">#${r.rank}</span>
+        <span><b>${r.ticker} ${r.name}</b><br><span style="color:var(--muted)">參考價 ${currency}${Number(price).toLocaleString()}</span></span>
+        <span class="weight">${fmt(eachBudget, currency)}</span>
+        <span class="qty">${qtyText}</span>
+        <span class="amt">${fmt(amount, currency)}</span>
+      `;
+      host.appendChild(row);
+    });
+  }
+
+  const sleeveAmount = capital * (sleevePct / 100);
+  const totalPlannedOutlay = actualInvested + sleeveAmount;
+  const remainingCash = Math.max(0, capital - totalPlannedOutlay);
+
+  setTxt('actualInvest', fmt(actualInvested, currency));
+  setTxt('actualCash', fmt(remainingCash, currency));
+}
+
+// ---- Section 6: Active Positions ----
+function renderActivePositions() {
+  const active = DATA.active_positions || [];
+  
+  const twActive = active.filter(x => x.market === 'TW');
+  const usActive = active.filter(x => x.market === 'US');
+
+  const calcMeanPnl = (arr) => {
+    if (arr.length === 0) return '0.00';
+    const sum = arr.reduce((acc, x) => acc + (Number(x.unrealized_pnl) || 0), 0);
+    return (sum / arr.length).toFixed(2);
+  };
+
+  const meanAll = calcMeanPnl(active);
+  const meanTw = calcMeanPnl(twActive);
+  const meanUs = calcMeanPnl(usActive);
+
+  setTxt('roiAll', `${Number(meanAll) >= 0 ? '+' : ''}${meanAll}%`);
+  setTxt('roiAllCount', `${active.length} 檔持倉`);
+
+  setTxt('roiTw', `${Number(meanTw) >= 0 ? '+' : ''}${meanTw}%`);
+  setTxt('roiTwCount', `${twActive.length} 檔持倉`);
+
+  setTxt('roiUs', `${Number(meanUs) >= 0 ? '+' : ''}${meanUs}%`);
+  setTxt('roiUsCount', `${usActive.length} 檔持倉`);
+
+  const host = document.getElementById('activePositionsGrid');
+  if (!host) return;
+
+  if (active.length === 0) {
+    host.innerHTML = '<div style="color:var(--muted);grid-column:1/-1;text-align:center;padding:24px">目前無持倉</div>';
+    return;
+  }
+
+  host.innerHTML = active.map(pos => {
+    const isTw = pos.market === 'TW';
+    const curr = isTw ? 'NT$' : 'US$';
+    const pnlVal = Number(pos.unrealized_pnl) || 0;
+    const pnlClass = pnlVal >= 0 ? 'pos' : 'neg';
+    const pnlSign = pnlVal > 0 ? '+' : '';
+
+    const holdingText = `第 ${pos.holding_day || 1} 天 / 共 10 天`;
+    const holdingPct = Math.min(100, Math.max(0, ((pos.holding_day || 1) / 10) * 100)).toFixed(1);
+    const statusText = POSITION_STATUS_ZH_MAP[pos.status] || '持倉中';
+
+    return `
+      <article class="stock">
+        <div class="stocktop">
+          <div class="stock-id">
+            <div class="rank old">#${pos.rank}</div>
+            <div>
+              <h3>${pos.ticker} ${pos.name}</h3>
+              <small>${isTw ? '臺股' : '美股'}目前持倉</small><br>
+              <span class="state-badge state-active">${pos.status || 'ACTIVE'}</span>
+            </div>
+          </div>
+          <div>
+            <span class="mode">${statusText}</span><br>
+            <span class="cohort">進場 ${pos.entry_date}</span>
+          </div>
+        </div>
+        <div class="pricegrid">
+          <div class="price"><span>進場價</span><b>${curr}${Number(pos.entry_price).toLocaleString()}</b></div>
+          <div class="price"><span>最新價</span><b>${curr}${Number(pos.status_price).toLocaleString()}</b></div>
+          <div class="price stop"><span>防守價</span><b>${curr}${Number(pos.stop).toLocaleString()}</b></div>
+          <div class="price ret ${pnlClass}"><span>未實現</span><b>${pnlSign}${pnlVal}%</b></div>
+          <div class="price"><span>目標 1</span><b>${curr}${Number(pos.tp1).toLocaleString()}</b></div>
+          <div class="price"><span>目標 2</span><b>${curr}${Number(pos.tp2).toLocaleString()}</b></div>
+        </div>
+        <div class="timeline">
+          <span>進場日期 ${pos.entry_date}</span>
+          <span>資料最新日期 ${pos.status_price_asof || ''}</span>
+          <span>持有進度 ${holdingText}</span>
+        </div>
+        <div class="progress"><i style="width:${holdingPct}%"></i></div>
+        <div class="progress-label"><span>Day ${pos.holding_day || 1}</span><span>${pos.holding_day || 1} / 10</span></div>
+      </article>
+    `;
+  }).join('');
+}
+
+// ---- Section 7: Closed Trades (Last 30 Days) ----
+function renderClosedTrades() {
+  let closed = DATA.closed_trades_30d || DATA.closed_trades || [];
+
+  if (historyFilter === 'TW') {
+    closed = closed.filter(t => t.market === 'TW');
+  } else if (historyFilter === 'US') {
+    closed = closed.filter(t => t.market === 'US');
+  } else if (historyFilter === 'STOP') {
+    closed = closed.filter(t => (t.exit_reason || '').includes('STOP'));
+  } else if (historyFilter === 'T+10') {
+    closed = closed.filter(t => (t.exit_reason || '').includes('T10') || (t.exit_reason || '').includes('TIME'));
+  }
+
+  const tbody = document.getElementById('closedTradesTbody');
+  if (!tbody) return;
+
+  if (closed.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px">近 30 天無符合條件之已結束交易</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = closed.map(t => {
+    const isTw = t.market === 'TW';
+    const curr = isTw ? 'NT$' : 'US$';
+    const pnlVal = Number(t.realized_return) || 0;
+    const pnlClass = pnlVal >= 0 ? 'pos' : 'neg';
+    const pnlSign = pnlVal > 0 ? '+' : '';
+    const reasonText = EXIT_REASON_ZH_MAP[t.exit_reason] || t.exit_reason_zh || t.exit_reason || '已結束';
+
+    return `
+      <tr>
+        <td><b>${t.ticker}</b> ${t.name}</td>
+        <td>${t.entry_date}</td>
+        <td>${curr}${Number(t.entry_price).toLocaleString()}</td>
+        <td>${t.exit_date}</td>
+        <td>${curr}${Number(t.exit_price).toLocaleString()}</td>
+        <td>${t.holding_days} 天</td>
+        <td><span class="reason-tag">${reasonText}</span></td>
+        <td class="${pnlClass}"><b>${pnlSign}${pnlVal}%</b></td>
+        <td><span class="pill">已結束</span></td>
+      </tr>
+    `;
+  }).join('');
+}
+
 </script>
 </body>
 </html>
