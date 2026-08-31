@@ -8,12 +8,12 @@
     "signal_date": "2026-08-29",
     "entry_date": "2026-08-31",
     "data_status": "OFFICIAL",
-    "generated_at": "2026-09-01T00:40:47+08:00",
+    "generated_at": "2026-09-01T00:41:05+08:00",
     "weather_tw_as_of": "2026-08-31",
     "weather_us_as_of": "2026-08-28",
     "event_watch_as_of": "2026-08-31",
-    "production_generated_at": "2026-09-01T00:40:47+08:00",
-    "production_last_success_at": "2026-09-01T00:40:47+08:00",
+    "production_generated_at": "2026-09-01T00:41:05+08:00",
+    "production_last_success_at": "2026-09-01T00:41:05+08:00",
     "production_health": "HEALTHY"
   },
   "market_weather": {
